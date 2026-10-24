@@ -1,0 +1,75 @@
+package ru.polkatv.launcher.weather
+
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+import ru.polkatv.launcher.settings.City
+import java.io.IOException
+
+class WeatherRepositoryTest {
+    @get:Rule val tmp = TemporaryFolder()
+    private val resp = Json { ignoreUnknownKeys = true }.decodeFromString<ForecastResponse>(javaClass.getResource("/openmeteo/forecast_sample.json")!!.readText())
+    private val city = City("Москва", "Москва", "Россия", 55.75, 37.625, "Europe/Moscow")
+
+    private class FakeApi(var fail: Boolean = false, val resp: ForecastResponse) : WeatherApi {
+        var calls = 0
+        override suspend fun forecast(lat: Double, lon: Double): ForecastResponse { calls++; if (fail) throw IOException("offline"); return resp }
+        override suspend fun search(query: String): List<GeoResultDto> = listOf(GeoResultDto("Москва", 55.75, 37.62, "Россия", "Москва", "Europe/Moscow"))
+    }
+
+    @Test fun `first refresh fetches, second within 30 minutes uses cache`() = runTest {
+        var now = 1_000_000L
+        val api = FakeApi(resp = resp)
+        val repo = WeatherRepository(api, WeatherCache(tmp.root), clock = { now })
+        repo.refresh(city); assertEquals(1, api.calls)
+        now += 10 * 60_000L
+        repo.refresh(city); assertEquals(1, api.calls)
+        now += 25 * 60_000L
+        repo.refresh(city); assertEquals(2, api.calls)
+        val s = repo.states.value[city.key]!!
+        assertNotNull(s.weather); assertFalse(s.stale); assertFalse(s.error)
+    }
+
+    @Test fun `failure keeps cached weather and marks stale and error`() = runTest {
+        var now = 1_000_000L
+        val api = FakeApi(resp = resp)
+        val repo = WeatherRepository(api, WeatherCache(tmp.root), clock = { now })
+        repo.refresh(city)
+        now += 61 * 60_000L; api.fail = true
+        repo.refresh(city)
+        val s = repo.states.value[city.key]!!
+        assertNotNull(s.weather); assertTrue(s.stale); assertTrue(s.error)
+    }
+
+    @Test fun `failure without cache yields error and null weather`() = runTest {
+        val repo = WeatherRepository(FakeApi(fail = true, resp = resp), WeatherCache(tmp.root), clock = { 5L })
+        repo.refresh(city)
+        val s = repo.states.value[city.key]!!
+        assertNull(s.weather); assertTrue(s.error)
+    }
+
+    @Test fun `force refresh ignores freshness`() = runTest {
+        val api = FakeApi(resp = resp)
+        val repo = WeatherRepository(api, WeatherCache(tmp.root), clock = { 1L })
+        repo.refresh(city); repo.refresh(city, force = true); assertEquals(2, api.calls)
+    }
+
+    @Test fun `remove drops state and cache`() = runTest {
+        val repo = WeatherRepository(FakeApi(resp = resp), WeatherCache(tmp.root), clock = { 1L })
+        repo.refresh(city); repo.remove(city)
+        assertNull(repo.states.value[city.key]); assertNull(WeatherCache(tmp.root).read(city.key))
+    }
+
+    @Test fun `search maps geo results to cities`() = runTest {
+        val repo = WeatherRepository(FakeApi(resp = resp), WeatherCache(tmp.root))
+        val cities = repo.search("Moskva")
+        assertEquals(City("Москва", "Москва", "Россия", 55.75, 37.62, "Europe/Moscow"), cities.single())
+    }
+}
