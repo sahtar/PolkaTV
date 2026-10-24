@@ -8,13 +8,13 @@ import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class WallpaperLoader(private val context: Context, private val targetWidth: Int = 1920, private val targetHeight: Int = 1080) {
+class WallpaperLoader(private val context: Context, private val targetWidth: Int = 1920, private val targetHeight: Int = 1080) : FrameSource {
     private val names: List<String> =
         (context.assets.list("wallpapers") ?: emptyArray()).filter { it.endsWith(".jpg") }.sorted()
 
-    val count: Int get() = names.size
+    override val count: Int get() = names.size
 
-    suspend fun load(index: Int): ImageBitmap = withContext(Dispatchers.IO) {
+    override suspend fun load(index: Int): ImageBitmap = withContext(Dispatchers.IO) {
         val name = names[index]
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         context.assets.open("wallpapers/$name").use { BitmapFactory.decodeStream(it, null, bounds) }
