@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Polka</string>
-    <string name="hello_placeholder">Polka</string>
+    <string name="tile_all_apps">All apps</string>
+    <string name="tile_empty">Choose an app</string>
+    <string name="tile_menu_title">Tile</string>
+    <string name="tile_menu_replace">Replace app</string>
+    <string name="tile_menu_move_left">Move left</string>
+    <string name="tile_menu_move_right">Move right</string>
+    <string name="picker_title">Choose an app</string>
+    <string name="header_inputs">Inputs</string>
+    <string name="header_notifications">Notifications</string>
+    <string name="header_network">Network</string>
+    <string name="header_tv_settings">TV settings</string>
+    <string name="header_polka_settings">Polka settings</string>
+    <string name="action_cancel">Cancel</string>
 </resources>

@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Полка</string>
-    <string name="hello_placeholder">Полка</string>
+    <string name="tile_all_apps">Все приложения</string>
+    <string name="tile_empty">Выбрать приложение</string>
+    <string name="tile_menu_title">Плитка</string>
+    <string name="tile_menu_replace">Заменить приложение</string>
+    <string name="tile_menu_move_left">Сдвинуть влево</string>
+    <string name="tile_menu_move_right">Сдвинуть вправо</string>
+    <string name="picker_title">Выберите приложение</string>
+    <string name="header_inputs">Входы</string>
+    <string name="header_notifications">Уведомления</string>
+    <string name="header_network">Сеть</string>
+    <string name="header_tv_settings">Настройки ТВ</string>
+    <string name="header_polka_settings">Настройки Полки</string>
+    <string name="action_cancel">Отмена</string>
 </resources>
