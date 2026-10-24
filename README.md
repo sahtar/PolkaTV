@@ -13,15 +13,18 @@
 - `./gradlew assembleRelease` — релизная сборка (подписана тем же ключом, поэтому ставится поверх debug: `adb install -r app/build/outputs/apk/release/app-release.apk`).
 
 ## Домашний экран
-На прошивке этого Xiaomi у HOME-фильтра лаунчера Google TV (`com.google.android.tvlauncher`) приоритет 2, у «Полки» — 0 (сторонние приложения поднять приоритет не могут). Поэтому одного `cmd package set-home-activity ru.polkatv.launcher/.MainActivity` недостаточно: роль HOME и предпочтительная активность записываются, но система всё равно открывает Google TV по кнопке Home и `resolve-activity` показывает его же. Кнопка Home откроет «Полку» только если отключить лаунчер Google TV:
+На этом телевизоре лаунчер Google TV (`com.google.android.tvlauncher`) отключён, и кнопка Home открывает «Полку». На прошивке Xiaomi у HOME-фильтра Google TV приоритет 2, у «Полки» — 0 (сторонние приложения поднять приоритет не могут), поэтому одного `set-home-activity` недостаточно. Применённые команды:
 
 ```
+adb shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity
 adb shell pm disable-user --user 0 com.google.android.tvlauncher
 ```
 
-Вернуть: `adb shell pm enable --user 0 com.google.android.tvlauncher`.
+После перезагрузки прошивка запускает свой быстрый запуск PatchWall (`com.mitv.tvhome.atv`), и он остаётся поверх всех окон. `BootReceiver` (по `BOOT_COMPLETED`) пытается вывести «Полку» вперёд, но Android 14 блокирует такой запуск из фона (политика background activity launch), поэтому после загрузки нужно один раз нажать Home.
 
-Этот шаг ожидает решения владельца и пока не выполнен: сейчас домашний экран — Google TV, «Полка» запускается из его списка приложений. Спецификация (п. 6.1) исходно требовала не отключать Google TV; решение об отступлении от неё за владельцем.
+`tools/install_tv.sh --set-home` применяет эту настройку, `tools/restore_googletv.sh` возвращает Google TV одной командой (вручную: `adb shell pm enable --user 0 com.google.android.tvlauncher`).
+
+Необязательно, на усмотрение владельца: снять ограничение после загрузки можно, выдав приложению разрешение на показ поверх других окон с компьютера: `adb shell appops set ru.polkatv.launcher SYSTEM_ALERT_WINDOW allow` (вернуть: `adb shell appops set ru.polkatv.launcher SYSTEM_ALERT_WINDOW default`). Для этого в манифесте должно быть объявлено `android.permission.SYSTEM_ALERT_WINDOW`; сейчас оно не объявлено, и ни скрипты, ни сборка эту команду не выполняют.
 
 ## Откат
 `tools/restore_googletv.sh` возвращает Google TV как домашний экран. «Полка» остаётся установленной; удалить: `adb shell pm uninstall ru.polkatv.launcher`.
