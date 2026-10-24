@@ -48,12 +48,21 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
 
     fun selectCity(index: Int) = viewModelScope.launch {
         container.settings.update { it.copy(selectedCity = index.coerceIn(0, (it.cities.size - 1).coerceAtLeast(0))) }
-        container.prefs.value.cities.getOrNull(index)?.let { container.weather.refresh(it) }
+        container.prefs.value.cities.getOrNull(index)?.let { city ->
+            // Do not queue another network call (10 s timeout under the repository mutex) while one is in flight or just failed;
+            // the 30-minute loop retries.
+            val st = container.weather.states.value[city.key]
+            if (st == null || (!st.loading && !st.error)) container.weather.refresh(city)
+        }
     }
 
     fun addCity(city: City) = viewModelScope.launch {
-        container.settings.update { p -> if (p.cities.size >= 6 || p.cities.any { it.key == city.key }) p else p.copy(cities = p.cities + city, selectedCity = p.cities.size) }
-        container.weather.refresh(city)
+        var added = false
+        container.settings.update { p ->
+            added = p.cities.size < 6 && p.cities.none { it.key == city.key }
+            if (added) p.copy(cities = p.cities + city, selectedCity = p.cities.size) else p
+        }
+        if (added) container.weather.refresh(city)
     }
 
     fun removeCity(index: Int) = viewModelScope.launch {

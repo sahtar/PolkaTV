@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.ListItem
 import androidx.tv.material3.Text
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import ru.polkatv.launcher.R
 import ru.polkatv.launcher.settings.City
@@ -61,7 +62,13 @@ fun AddCityDialog(search: suspend (String) -> List<City>, onPick: (City) -> Unit
         if (query.trim().length < 2) { state = SearchState.Idle; return@LaunchedEffect }
         delay(400)
         state = SearchState.Loading
-        state = runCatching { SearchState.Results(search(query.trim())) }.getOrElse { SearchState.Error }
+        state = try {
+            SearchState.Results(search(query.trim()))
+        } catch (e: CancellationException) {
+            throw e   // a newer keystroke cancelled this search; do not flash the error
+        } catch (e: Exception) {
+            SearchState.Error
+        }
     }
     LaunchedEffect(Unit) { focus.requestFocus() }
 
