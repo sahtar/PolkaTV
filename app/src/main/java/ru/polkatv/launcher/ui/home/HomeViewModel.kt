@@ -1,6 +1,5 @@
 package ru.polkatv.launcher.ui.home
 
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,9 +18,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeState())
 
     fun launchApp(app: TvApp) {
-        val intent = container.apps.launchIntent(app.packageName) ?: return
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        runCatching { container.appContext.startActivity(intent) }
+        container.apps.launch(app.packageName)
     }
 
     fun replaceTile(index: Int, pkg: String?) = viewModelScope.launch {

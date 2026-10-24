@@ -14,4 +14,11 @@
     <string name="header_tv_settings">Настройки ТВ</string>
     <string name="header_polka_settings">Настройки Полки</string>
     <string name="action_cancel">Отмена</string>
+    <string name="all_apps_title">Все приложения</string>
+    <string name="app_menu_add_home">Добавить на главный экран</string>
+    <string name="app_menu_info">Информация о приложении</string>
+    <string name="replace_which_title">Все плитки заняты. Какую заменить?</string>
+    <string name="tile_n">Плитка %1$d: %2$s</string>
+    <string name="tile_n_empty">Плитка %1$d: пусто</string>
+    <string name="unavailable_on_tv">Недоступно на этом телевизоре</string>
 </resources>

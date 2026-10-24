@@ -13,6 +13,7 @@ import ru.polkatv.launcher.apps.TileArtLoader
 import ru.polkatv.launcher.settings.Prefs
 import ru.polkatv.launcher.settings.SettingsRepository
 import ru.polkatv.launcher.settings.polkaDataStore
+import ru.polkatv.launcher.system.SystemActions
 import ru.polkatv.launcher.wallpaper.WallpaperController
 import ru.polkatv.launcher.wallpaper.WallpaperLoader
 
@@ -25,4 +26,5 @@ class AppContainer(val appContext: Context) {
     val wallpapers = WallpaperController(WallpaperLoader(appContext), wallpaperInterval, appScope)
     val apps = AppsRepository(appContext, appScope)
     val tileArt = TileArtLoader(appContext)
+    val system = SystemActions(appContext)
 }

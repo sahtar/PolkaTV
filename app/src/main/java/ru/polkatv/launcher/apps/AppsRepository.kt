@@ -78,4 +78,10 @@ class AppsRepository(private val context: Context, private val scope: CoroutineS
 
     fun launchIntent(packageName: String): Intent? =
         pm.getLeanbackLaunchIntentForPackage(packageName) ?: pm.getLaunchIntentForPackage(packageName)
+
+    fun launch(packageName: String): Boolean {
+        val intent = launchIntent(packageName) ?: return false
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return runCatching { context.startActivity(intent) }.isSuccess
+    }
 }

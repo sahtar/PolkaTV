@@ -14,4 +14,11 @@
     <string name="header_tv_settings">TV settings</string>
     <string name="header_polka_settings">Polka settings</string>
     <string name="action_cancel">Cancel</string>
+    <string name="all_apps_title">All apps</string>
+    <string name="app_menu_add_home">Add to home screen</string>
+    <string name="app_menu_info">App info</string>
+    <string name="replace_which_title">All tiles are taken. Replace which one?</string>
+    <string name="tile_n">Tile %1$d: %2$s</string>
+    <string name="tile_n_empty">Tile %1$d: empty</string>
+    <string name="unavailable_on_tv">Not available on this TV</string>
 </resources>

@@ -2,11 +2,9 @@ package ru.polkatv.launcher.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,6 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.polkatv.launcher.AppContainer
+import ru.polkatv.launcher.ui.apps.AllAppsScreen
+import ru.polkatv.launcher.ui.apps.AllAppsViewModel
 import ru.polkatv.launcher.ui.home.HeaderActions
 import ru.polkatv.launcher.ui.home.HomeScreen
 import ru.polkatv.launcher.ui.home.HomeViewModel
@@ -43,7 +43,9 @@ fun PolkaApp(container: AppContainer) {
                 weatherShelf = { m -> Box(m.background(GlassFill, RoundedCornerShape(24.dp))) },   // Task 8 replaces
             )
         }
-        // Task 6 replaces this stub with AllAppsScreen
-        composable(Routes.ALL_APPS) { Box(Modifier.fillMaxSize().background(Color(0xFF060912))) }
+        composable(Routes.ALL_APPS) {
+            val vm: AllAppsViewModel = viewModel(factory = viewModelFactory { initializer { AllAppsViewModel(container) } })
+            AllAppsScreen(vm = vm, container = container, onBack = { nav.popBackStack() })
+        }
     }
 }
