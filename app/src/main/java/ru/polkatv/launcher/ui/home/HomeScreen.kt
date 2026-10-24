@@ -1,6 +1,5 @@
 package ru.polkatv.launcher.ui.home
 
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,11 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.polkatv.launcher.AppContainer
@@ -27,7 +23,6 @@ import ru.polkatv.launcher.system.NetState
 import ru.polkatv.launcher.ui.apps.AppPickerDialog
 import ru.polkatv.launcher.ui.theme.Dimens
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HomeScreen(
     vm: HomeViewModel,
@@ -39,8 +34,7 @@ fun HomeScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val wallpaper by container.wallpapers.current.collectAsStateWithLifecycle()
     val firstTileFocus = remember { FocusRequester() }
-    val headerFocus = remember { FocusRequester() }
-    val rowFocus = remember { FocusRequester() }
+    val tiers = remember { TierFocus() }
     var menuFor by remember { mutableStateOf<TileSlot.App?>(null) }
     var pickFor by remember { mutableStateOf<Int?>(null) }
 
@@ -51,19 +45,19 @@ fun HomeScreen(
     Box(Modifier.fillMaxSize()) {
         WallpaperBackground(bitmap = wallpaper, dimStrength = state.prefs.dimLevel.strength)
         Column(Modifier.fillMaxSize().padding(horizontal = Dimens.safeH, vertical = Dimens.safeV)) {
-            Box(Modifier.focusProperties { exit = { if (it == FocusDirection.Down) rowFocus else FocusRequester.Default } }.focusGroup()) {
+            Box(Modifier.tierExits(up = null, down = tiers.row)) {
                 Header(
                     clockFormat = state.prefs.clockFormat,
                     showDate = state.prefs.showDate,
                     net = NetState.WIFI,                       // Task 9 replaces with the live flow
                     actions = headerActions,
-                    iconsFocus = headerFocus,
+                    iconsFocus = tiers.header,
                 )
             }
             Spacer(Modifier.height(Dimens.tierGap))
-            weatherShelf(Modifier.weight(1f).fillMaxWidth())
+            weatherShelf(Modifier.weight(1f).fillMaxWidth().focusRequester(tiers.shelf))
             Spacer(Modifier.height(Dimens.tierGap))
-            Box(Modifier.focusProperties { exit = { if (it == FocusDirection.Up) headerFocus else FocusRequester.Default } }.focusGroup()) {
+            Box(Modifier.tierExits(up = tiers.header, down = null)) {
                 AppRow(
                     tiles = state.tiles,
                     artLoader = container.tileArt,
@@ -72,7 +66,7 @@ fun HomeScreen(
                     onPickFor = { pickFor = it },
                     onMenu = { menuFor = it },
                     onAllApps = onOpenAllApps,
-                    modifier = Modifier.focusRequester(rowFocus),
+                    modifier = Modifier.focusRequester(tiers.row),
                 )
             }
         }

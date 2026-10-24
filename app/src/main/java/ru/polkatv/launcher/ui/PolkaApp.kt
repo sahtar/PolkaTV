@@ -43,5 +43,7 @@ fun PolkaApp(container: AppContainer) {
                 weatherShelf = { m -> Box(m.background(GlassFill, RoundedCornerShape(24.dp))) },   // Task 8 replaces
             )
         }
+        // Task 6 replaces this stub with AllAppsScreen
+        composable(Routes.ALL_APPS) { Box(Modifier.fillMaxSize().background(Color(0xFF060912))) }
     }
 }

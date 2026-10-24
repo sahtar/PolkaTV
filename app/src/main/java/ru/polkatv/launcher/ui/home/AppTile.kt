@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -65,10 +67,15 @@ fun AppTile(slot: TileSlot.App, artLoader: TileArtLoader, modifier: Modifier, on
     TileCard(modifier, onClick, onLongClick) {
         when (val a = art) {
             is TileArt.Banner -> Image(a.image, contentDescription = slot.app.label, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            is TileArt.Icon -> Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(a.start, a.end)))) {
-                Image(a.image, contentDescription = null, modifier = Modifier.size(64.dp).align(Alignment.Center))
-                Text(slot.app.label, fontSize = 16.sp, color = Color.White, maxLines = 1,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp))
+            is TileArt.Icon -> Column(
+                Modifier.fillMaxSize().background(Brush.linearGradient(listOf(a.start, a.end))),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Image(a.image, contentDescription = null, modifier = Modifier.size(36.dp))
+                }
+                Text(slot.app.label, fontSize = 14.sp, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 6.dp).padding(bottom = 6.dp))
             }
             null -> Box(Modifier.fillMaxSize().background(Color(0x22FFFFFF)))
         }
@@ -81,7 +88,7 @@ fun EmptyTile(modifier: Modifier, onClick: () -> Unit) {
     TileCard(modifier, onClick) {
         Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(Icons.Default.Add, contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(28.dp))
-            Text(stringResource(R.string.tile_empty), fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f), textAlign = TextAlign.Center)
+            Text(stringResource(R.string.tile_empty), fontSize = 14.sp, lineHeight = 16.sp, color = Color.White.copy(alpha = 0.8f), textAlign = TextAlign.Center)
         }
     }
 }
