@@ -1,6 +1,7 @@
 package ru.polkatv.launcher.ui.home
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -58,6 +59,8 @@ fun HomeScreen(
         onPolkaSettings = onOpenSettings,
     )
 
+    // Back does nothing on the home screen (spec 4.2); dialogs handle their own Back.
+    BackHandler(enabled = true) { }
     LaunchedEffect(Unit) { vm.startWeatherLoop() }
     DisposableEffect(Unit) { onDispose { vm.stopWeatherLoop() } }
 

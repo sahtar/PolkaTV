@@ -1,5 +1,6 @@
 package ru.polkatv.launcher.weather
 
+import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,7 @@ class WeatherRepository(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                Log.w("Polka", "weather refresh failed for ${city.key}: ${e.javaClass.simpleName}: ${e.message}")
                 publish(city, cached, now, error = true)
             }
         } catch (e: CancellationException) {
@@ -71,7 +73,7 @@ class WeatherRepository(
     }
 
     suspend fun search(query: String): List<City> =
-        api.search(query).map { City(it.name, it.admin1, it.country, it.latitude, it.longitude, it.timezone) }
+        api.search(query).map { City(it.name, it.admin1, it.country, it.latitude, it.longitude, it.timezone) }.distinctBy { it.key }
 
     private fun toWeather(entry: CachedForecast, now: Long): Weather {
         val r = entry.response

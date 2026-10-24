@@ -25,10 +25,10 @@ android {
         applicationId = "ru.polkatv.launcher"
         minSdk = 30
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.0.1"
         resourceConfigurations += listOf("ru", "en")
-        buildConfigField("String", "OWM_API_KEY", "\"${localProps.getProperty("owm.apiKey", "")}\"")
+        buildConfigField("String", "OWM_API_KEY", "\"${localProps.getProperty("owm.apiKey", "").trim()}\"")
     }
 
     signingConfigs {

@@ -1,6 +1,6 @@
 # PolkaTV («Полка»)
 
-Домашний экран для Xiaomi MiTV-MOEU1 (Android TV 14) в стиле Apple TV: часы, погода для нескольких городов (Open-Meteo), 4–6 плиток приложений, служебные иконки, фото из заставки Xiaomi фоном.
+Домашний экран для Xiaomi MiTV-MOEU1 (Android TV 14) в стиле Apple TV: часы, погода для нескольких городов (OpenWeatherMap; поиск городов через геокодинг Open-Meteo), 4–6 плиток приложений, служебные иконки, фото из заставки Xiaomi фоном.
 
 Спецификация: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`. План: `docs/superpowers/plans/2026-10-24-polkatv-launcher.md`.
 
@@ -19,7 +19,7 @@
 adb shell pm disable-user --user 0 com.google.android.tvlauncher
 ```
 
-Вернуть: `adb shell pm enable com.google.android.tvlauncher`.
+Вернуть: `adb shell pm enable --user 0 com.google.android.tvlauncher`.
 
 Этот шаг ожидает решения владельца и пока не выполнен: сейчас домашний экран — Google TV, «Полка» запускается из его списка приложений. Спецификация (п. 6.1) исходно требовала не отключать Google TV; решение об отступлении от неё за владельцем.
 

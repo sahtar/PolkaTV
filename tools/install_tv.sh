@@ -8,6 +8,7 @@ adb connect "$TV" >/dev/null
 adb -s "$TV" install -r app/build/outputs/apk/debug/app-debug.apk
 if [ "${1:-}" = "--set-home" ]; then
   adb -s "$TV" shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity
+  echo "Note: on this Xiaomi firmware the Home button only opens Polka after \`adb shell pm disable-user --user 0 com.google.android.tvlauncher\` (see README)"
 fi
 adb -s "$TV" shell am start -n ru.polkatv.launcher/.MainActivity >/dev/null
 echo "Installed. HOME now: $(adb -s "$TV" shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tail -1)"

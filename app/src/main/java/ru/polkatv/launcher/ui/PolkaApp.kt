@@ -43,7 +43,6 @@ fun PolkaApp(container: AppContainer) {
                 onOpenSettings = { nav.navigate(Routes.SETTINGS) },
             )
         }
-        // Task 10 replaces this stub with SettingsScreen
         composable(Routes.SETTINGS) {
             val vm: SettingsViewModel = viewModel(factory = viewModelFactory { initializer { SettingsViewModel(container) } })
             SettingsScreen(vm = vm, onBack = { nav.popBackStack() })

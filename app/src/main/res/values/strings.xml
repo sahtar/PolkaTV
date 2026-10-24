@@ -75,7 +75,7 @@
     <string name="add_city_no_network">Нет связи</string>
     <string name="add_city_nothing">Ничего не найдено</string>
     <string name="wx_detail_hourly">Прогноз по часам</string>
-    <string name="wx_detail_daily">На 7 дней</string>
+    <string name="wx_detail_daily">Прогноз по дням</string>
     <string name="wx_sunrise">Восход %1$s</string>
     <string name="wx_sunset">Закат %1$s</string>
     <string name="wx_today">Сегодня</string>
@@ -109,8 +109,8 @@
     <string name="settings_clock_12">12 часов</string>
     <string name="settings_show_date">Показывать дату</string>
     <string name="settings_version">Версия %1$s</string>
-    <string name="settings_set_home_hint">Сделать домашним экраном: adb shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity</string>
-    <string name="settings_restore_hint">Вернуть Google TV: adb shell cmd package set-home-activity com.google.android.tvlauncher/.MainActivity</string>
+    <string name="settings_set_home_hint">Сделать домашним: см. README (adb: pm disable-user --user 0 com.google.android.tvlauncher)</string>
+    <string name="settings_restore_hint">Вернуть Google TV: tools/restore_googletv.sh (adb: pm enable --user 0 com.google.android.tvlauncher)</string>
     <string name="on">Вкл</string>
     <string name="off">Выкл</string>
 </resources>

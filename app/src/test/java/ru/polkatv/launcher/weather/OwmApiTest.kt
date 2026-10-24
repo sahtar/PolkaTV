@@ -6,6 +6,8 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
@@ -40,10 +42,15 @@ class OwmApiTest {
         try { api(key = "").forecast(1.0, 2.0) } finally { assertEquals(0, server.requestCount) }
     }
 
-    @Test(expected = IOException::class)
-    fun `http 401 throws IOException`() = runTest {
+    @Test
+    fun `http 401 throws IOException that does not leak the key`() = runTest {
         server.enqueue(MockResponse().setResponseCode(401).setBody("{\"cod\":401,\"message\":\"Invalid API key\"}"))
-        api().forecast(1.0, 2.0)
+        try {
+            api().forecast(1.0, 2.0)
+            fail("expected IOException")
+        } catch (e: IOException) {
+            assertFalse(e.message!!.contains("k123"))
+        }
     }
 
     @Test fun `search delegates to the geocoder`() = runTest {

@@ -6,7 +6,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -36,9 +39,11 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     fun startWeatherLoop() {
         if (refreshJob?.isActive == true) return
         refreshJob = viewModelScope.launch {
-            while (isActive) {
-                container.weather.refreshAll(container.prefs.value.cities)
-                delay(WeatherRepository.FRESH_MS)
+            container.prefs.map { it.cities }.distinctUntilChanged().collectLatest { cities ->
+                while (isActive) {
+                    container.weather.refreshAll(cities)
+                    delay(WeatherRepository.FRESH_MS)
+                }
             }
         }
     }

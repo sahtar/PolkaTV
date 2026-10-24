@@ -75,7 +75,7 @@
     <string name="add_city_no_network">No connection</string>
     <string name="add_city_nothing">Nothing found</string>
     <string name="wx_detail_hourly">Forecast by hours</string>
-    <string name="wx_detail_daily">7-day forecast</string>
+    <string name="wx_detail_daily">Daily forecast</string>
     <string name="wx_sunrise">Sunrise %1$s</string>
     <string name="wx_sunset">Sunset %1$s</string>
     <string name="wx_today">Today</string>
@@ -109,8 +109,8 @@
     <string name="settings_clock_12">12-hour</string>
     <string name="settings_show_date">Show date</string>
     <string name="settings_version">Version %1$s</string>
-    <string name="settings_set_home_hint">Make it the home screen: adb shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity</string>
-    <string name="settings_restore_hint">Restore Google TV: adb shell cmd package set-home-activity com.google.android.tvlauncher/.MainActivity</string>
+    <string name="settings_set_home_hint">Make it home: see README (adb: pm disable-user --user 0 com.google.android.tvlauncher)</string>
+    <string name="settings_restore_hint">Restore Google TV: tools/restore_googletv.sh (adb: pm enable --user 0 com.google.android.tvlauncher)</string>
     <string name="on">On</string>
     <string name="off">Off</string>
 </resources>

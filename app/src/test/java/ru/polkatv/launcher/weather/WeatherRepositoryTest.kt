@@ -24,10 +24,10 @@ class WeatherRepositoryTest {
     private val resp = Json { ignoreUnknownKeys = true }.decodeFromString<ForecastResponse>(javaClass.getResource("/openmeteo/forecast_sample.json")!!.readText())
     private val city = City("Москва", "Москва", "Россия", 55.75, 37.625, "Europe/Moscow")
 
-    private class FakeApi(var fail: Boolean = false, var hang: Boolean = false, var resp: ForecastResponse) : WeatherApi {
+    private class FakeApi(var fail: Boolean = false, var hang: Boolean = false, var resp: ForecastResponse, var geo: List<GeoResultDto>? = null) : WeatherApi {
         var calls = 0
         override suspend fun forecast(lat: Double, lon: Double): ForecastResponse { calls++; if (hang) awaitCancellation(); if (fail) throw IOException("offline"); return resp }
-        override suspend fun search(query: String): List<GeoResultDto> = listOf(GeoResultDto("Москва", 55.75, 37.62, "Россия", "Москва", "Europe/Moscow"))
+        override suspend fun search(query: String): List<GeoResultDto> = geo ?: listOf(GeoResultDto("Москва", 55.75, 37.62, "Россия", "Москва", "Europe/Moscow"))
     }
 
     @Test fun `first refresh fetches, second within 30 minutes uses cache`() = runTest {
@@ -99,5 +99,25 @@ class WeatherRepositoryTest {
         val s = repo.states.value[city.key]!!
         assertTrue(s.error); assertFalse(s.loading); assertNull(s.weather)
         assertNull(cache.read(city.key))
+    }
+
+    @Test fun `refreshAll keeps listed cities, drops others from state but not from cache`() = runTest {
+        val other = City("Казань", "Татарстан", "Россия", 55.79, 49.12, "Europe/Moscow")
+        val cache = WeatherCache(tmp.root)
+        val repo = WeatherRepository(FakeApi(resp = resp), cache, clock = { 1L })
+        repo.refreshAll(listOf(city, other))
+        assertNotNull(repo.states.value[city.key]); assertNotNull(repo.states.value[other.key])
+        repo.refreshAll(listOf(city))
+        assertNotNull(repo.states.value[city.key]); assertNull(repo.states.value[other.key])
+        assertNotNull(cache.read(other.key))
+    }
+
+    @Test fun `search drops results with identical coordinate keys`() = runTest {
+        val dup = listOf(
+            GeoResultDto("Москва", 55.75001, 37.62, "Россия", "Москва", "Europe/Moscow"),
+            GeoResultDto("Moscow", 55.75002, 37.62, "Russia", "Moscow", "Europe/Moscow"),
+        )
+        val repo = WeatherRepository(FakeApi(resp = resp, geo = dup), WeatherCache(tmp.root))
+        assertEquals(1, repo.search("Mosk").size)
     }
 }
