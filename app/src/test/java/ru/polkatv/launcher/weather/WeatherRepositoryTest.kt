@@ -1,5 +1,11 @@
 package ru.polkatv.launcher.weather
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -18,9 +24,9 @@ class WeatherRepositoryTest {
     private val resp = Json { ignoreUnknownKeys = true }.decodeFromString<ForecastResponse>(javaClass.getResource("/openmeteo/forecast_sample.json")!!.readText())
     private val city = City("Москва", "Москва", "Россия", 55.75, 37.625, "Europe/Moscow")
 
-    private class FakeApi(var fail: Boolean = false, val resp: ForecastResponse) : WeatherApi {
+    private class FakeApi(var fail: Boolean = false, var hang: Boolean = false, var resp: ForecastResponse) : WeatherApi {
         var calls = 0
-        override suspend fun forecast(lat: Double, lon: Double): ForecastResponse { calls++; if (fail) throw IOException("offline"); return resp }
+        override suspend fun forecast(lat: Double, lon: Double): ForecastResponse { calls++; if (hang) awaitCancellation(); if (fail) throw IOException("offline"); return resp }
         override suspend fun search(query: String): List<GeoResultDto> = listOf(GeoResultDto("Москва", 55.75, 37.62, "Россия", "Москва", "Europe/Moscow"))
     }
 
@@ -71,5 +77,27 @@ class WeatherRepositoryTest {
         val repo = WeatherRepository(FakeApi(resp = resp), WeatherCache(tmp.root))
         val cities = repo.search("Moskva")
         assertEquals(City("Москва", "Москва", "Россия", 55.75, 37.62, "Europe/Moscow"), cities.single())
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test fun `cancelled refresh does not publish an error and clears loading`() = runTest {
+        val api = FakeApi(hang = true, resp = resp)
+        val repo = WeatherRepository(api, WeatherCache(tmp.root), clock = { 1L }, io = StandardTestDispatcher(testScheduler))
+        val job = launch { repo.refresh(city) }
+        runCurrent()
+        assertTrue(repo.states.value[city.key]!!.loading)
+        job.cancelAndJoin()
+        val s = repo.states.value[city.key]!!
+        assertFalse(s.error); assertFalse(s.loading); assertNull(s.weather)
+    }
+
+    @Test fun `unmappable response yields error and is not cached`() = runTest {
+        val broken = resp.copy(daily = resp.daily.copy(time = listOf("not-a-date") + resp.daily.time.drop(1)))
+        val cache = WeatherCache(tmp.root)
+        val repo = WeatherRepository(FakeApi(resp = broken), cache, clock = { 1L })
+        repo.refresh(city)
+        val s = repo.states.value[city.key]!!
+        assertTrue(s.error); assertFalse(s.loading); assertNull(s.weather)
+        assertNull(cache.read(city.key))
     }
 }

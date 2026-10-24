@@ -50,4 +50,16 @@ class WeatherMapperTest {
         assertEquals(0, late.hourly.size)
         assertNull(late.current.precipProbability)
     }
+
+    @Test fun `ragged arrays and unparsable sunrise are tolerated`() {
+        val ragged = resp.copy(
+            hourly = resp.hourly.copy(temperature = resp.hourly.temperature.take(5)),
+            daily = resp.daily.copy(sunrise = listOf("garbage")),
+        )
+        val m = WeatherMapper.map(ragged, 0L, now)
+        assertEquals(2, m.hourly.size)                    // indices 3 and 4 of the 5 available
+        assertNull(m.daily[0].sunrise)
+        assertNull(m.daily[1].sunrise)                    // missing entry
+        assertEquals(LocalTime.of(17, 2), m.daily[0].sunset)
+    }
 }

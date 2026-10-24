@@ -15,7 +15,7 @@ data class HourForecast(val time: LocalDateTime, val tempC: Double, val code: In
 
 data class DayForecast(
     val date: LocalDate, val tMinC: Double, val tMaxC: Double, val code: Int,
-    val precipProbabilityMax: Int?, val sunrise: LocalTime, val sunset: LocalTime,
+    val precipProbabilityMax: Int?, val sunrise: LocalTime?, val sunset: LocalTime?,
 )
 
 data class Weather(
