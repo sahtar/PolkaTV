@@ -16,9 +16,19 @@ import ru.polkatv.launcher.ui.common.PolkaDialog
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun AppPickerDialog(apps: List<TvApp>, onPick: (TvApp) -> Unit, onDismiss: () -> Unit) {
+fun AppPickerDialog(
+    apps: List<TvApp>,
+    onPick: (TvApp) -> Unit,
+    onDismiss: () -> Unit,
+    extraAction: Pair<String, () -> Unit>? = null,
+) {
     PolkaDialog(onDismiss = onDismiss, title = stringResource(R.string.picker_title)) {
         LazyColumn(Modifier.height(340.dp)) {
+            if (extraAction != null) {
+                item(key = "extra_action") {
+                    ListItem(selected = false, onClick = extraAction.second, headlineContent = { Text(extraAction.first) })
+                }
+            }
             items(apps, key = { it.packageName }) { app ->
                 ListItem(selected = false, onClick = { onPick(app) }, headlineContent = { Text(app.label) })
             }
