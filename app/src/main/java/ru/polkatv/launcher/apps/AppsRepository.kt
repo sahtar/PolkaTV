@@ -6,8 +6,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +23,8 @@ class AppsRepository(private val context: Context, private val scope: CoroutineS
     private val pm: PackageManager = context.packageManager
     private val _apps = MutableStateFlow<List<TvApp>>(emptyList())
     val apps: StateFlow<List<TvApp>> = _apps.asStateFlow()
+
+    @Volatile private var refreshJob: Job? = null
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(c: Context, i: Intent) { refresh() }
@@ -35,9 +40,23 @@ class AppsRepository(private val context: Context, private val scope: CoroutineS
         refresh()
     }
 
-    fun stop() { runCatching { context.unregisterReceiver(receiver) } }
+    fun stop() {
+        refreshJob?.cancel()
+        runCatching { context.unregisterReceiver(receiver) }
+    }
 
-    fun refresh() { scope.launch { _apps.value = query() } }
+    fun refresh() {
+        refreshJob?.cancel()
+        refreshJob = scope.launch {
+            try {
+                _apps.value = query()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Polka", "apps query failed", e)
+            }
+        }
+    }
 
     private suspend fun query(): List<TvApp> = withContext(Dispatchers.IO) {
         val self = context.packageName
