@@ -1,4 +1,5 @@
 # Android / Gradle
+.kotlin/
 *.iml
 .gradle/
 /local.properties
