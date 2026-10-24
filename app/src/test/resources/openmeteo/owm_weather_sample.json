@@ -1,0 +1,8 @@
+{"coord":{"lon":37.6173,"lat":55.7558},
+ "weather":[{"id":500,"main":"Rain","description":"небольшой дождь","icon":"10n"}],
+ "main":{"temp":7.3,"feels_like":4.9,"temp_min":6.8,"temp_max":7.9,"pressure":1003,"sea_level":1003,"grnd_level":985,"humidity":81},
+ "wind":{"speed":6.1,"deg":250},
+ "clouds":{"all":90},
+ "dt":1792866600,
+ "sys":{"country":"RU","sunrise":1792815660,"sunset":1792850520},
+ "timezone":10800,"id":524901,"name":"Москва","cod":200}
