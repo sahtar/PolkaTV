@@ -1,5 +1,6 @@
 package ru.polkatv.launcher.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,13 +18,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.polkatv.launcher.AppContainer
 import ru.polkatv.launcher.R
 import ru.polkatv.launcher.apps.TileSlot
-import ru.polkatv.launcher.system.NetState
+import ru.polkatv.launcher.system.TvInput
 import ru.polkatv.launcher.ui.apps.AppPickerDialog
+import ru.polkatv.launcher.ui.inputs.InputsDialog
 import ru.polkatv.launcher.ui.theme.Dimens
 import ru.polkatv.launcher.ui.weather.AddCityDialog
 
@@ -31,9 +34,9 @@ import ru.polkatv.launcher.ui.weather.AddCityDialog
 fun HomeScreen(
     vm: HomeViewModel,
     container: AppContainer,
-    headerActions: HeaderActions,
     onOpenAllApps: () -> Unit,
     onOpenWeather: (Int) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val wallpaper by container.wallpapers.current.collectAsStateWithLifecycle()
@@ -43,6 +46,17 @@ fun HomeScreen(
     var pickFor by remember { mutableStateOf<Int?>(null) }
     var cityMenu by remember { mutableStateOf(false) }
     var addCity by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val net by container.network.state.collectAsStateWithLifecycle()
+    var inputs by remember { mutableStateOf<List<TvInput>?>(null) }
+    fun orToast(ok: Boolean) { if (!ok) Toast.makeText(context, R.string.unavailable_on_tv, Toast.LENGTH_SHORT).show() }
+    val headerActions = HeaderActions(
+        onInputs = { inputs = container.inputs.list() },
+        onNotifications = { orToast(container.system.openNotifications()) },
+        onNetwork = { orToast(container.system.openNetworkSettings()) },
+        onTvSettings = { orToast(container.system.openTvSettings()) },
+        onPolkaSettings = onOpenSettings,
+    )
 
     LaunchedEffect(Unit) { vm.startWeatherLoop() }
     DisposableEffect(Unit) { onDispose { vm.stopWeatherLoop() } }
@@ -58,7 +72,7 @@ fun HomeScreen(
                 Header(
                     clockFormat = state.prefs.clockFormat,
                     showDate = state.prefs.showDate,
-                    net = NetState.WIFI,                       // Task 9 replaces with the live flow
+                    net = net,
                     actions = headerActions,
                     iconsFocus = tiers.header,
                 )
@@ -113,4 +127,5 @@ fun HomeScreen(
         )
     }
     if (addCity) AddCityDialog(search = { vm.searchCities(it) }, onPick = { vm.addCity(it); addCity = false }, onDismiss = { addCity = false })
+    inputs?.let { list -> InputsDialog(inputs = list, onPick = { inputs = null; orToast(container.inputs.switchTo(it)) }, onDismiss = { inputs = null }) }
 }

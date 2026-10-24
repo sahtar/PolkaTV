@@ -15,4 +15,18 @@ class SystemActions(private val context: Context) {
 
     fun openAppInfo(packageName: String): Boolean =
         launch(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
+
+    fun openTvSettings(): Boolean = launch(Intent(Settings.ACTION_SETTINGS))
+
+    fun openNotifications(): Boolean = launch(Intent("com.android.tv.NOTIFICATIONS_PANEL"))
+
+    fun openNetworkSettings(): Boolean =
+        launch(Intent().setClassName("com.android.tv.settings", "com.android.tv.settings.connectivity.NetworkActivity"))
+            || launch(Intent(Settings.ACTION_WIFI_SETTINGS))
+
+    fun openLiveTv(): Boolean {
+        val pm = context.packageManager
+        val intent = pm.getLeanbackLaunchIntentForPackage("com.mitv.livetv") ?: pm.getLaunchIntentForPackage("com.mitv.livetv") ?: return false
+        return launch(intent)
+    }
 }

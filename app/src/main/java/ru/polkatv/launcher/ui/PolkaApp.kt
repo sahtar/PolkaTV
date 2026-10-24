@@ -1,7 +1,12 @@
 package ru.polkatv.launcher.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -14,7 +19,6 @@ import androidx.navigation.navArgument
 import ru.polkatv.launcher.AppContainer
 import ru.polkatv.launcher.ui.apps.AllAppsScreen
 import ru.polkatv.launcher.ui.apps.AllAppsViewModel
-import ru.polkatv.launcher.ui.home.HeaderActions
 import ru.polkatv.launcher.ui.home.HomeScreen
 import ru.polkatv.launcher.ui.home.HomeViewModel
 import ru.polkatv.launcher.ui.weather.WeatherDetailScreen
@@ -37,11 +41,13 @@ fun PolkaApp(container: AppContainer) {
             HomeScreen(
                 vm = vm,
                 container = container,
-                headerActions = HeaderActions({}, {}, {}, {}, {}),   // wired in Task 9/10
-                onOpenAllApps = { nav.navigate(Routes.ALL_APPS) },  // screen arrives in Task 6
+                onOpenAllApps = { nav.navigate(Routes.ALL_APPS) },
                 onOpenWeather = { nav.navigate(Routes.weather(it)) },
+                onOpenSettings = { nav.navigate(Routes.SETTINGS) },
             )
         }
+        // Task 10 replaces this stub with SettingsScreen
+        composable(Routes.SETTINGS) { Box(Modifier.fillMaxSize().background(Color.Black)) }
         composable(Routes.ALL_APPS) {
             val vm: AllAppsViewModel = viewModel(factory = viewModelFactory { initializer { AllAppsViewModel(container) } })
             AllAppsScreen(vm = vm, container = container, onBack = { nav.popBackStack() })

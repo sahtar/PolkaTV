@@ -78,4 +78,10 @@
     <string name="wx_sunrise">Sunrise %1$s</string>
     <string name="wx_sunset">Sunset %1$s</string>
     <string name="wx_today">Today</string>
+    <string name="inputs_title">Inputs</string>
+    <string name="input_state_connected">Connected</string>
+    <string name="input_state_no_signal">No signal</string>
+    <string name="input_state_disconnected">Not connected</string>
+    <string name="input_state_unknown">—</string>
+    <string name="inputs_none">No inputs found</string>
 </resources>

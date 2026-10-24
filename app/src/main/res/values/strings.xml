@@ -78,4 +78,10 @@
     <string name="wx_sunrise">Восход %1$s</string>
     <string name="wx_sunset">Закат %1$s</string>
     <string name="wx_today">Сегодня</string>
+    <string name="inputs_title">Входы</string>
+    <string name="input_state_connected">Подключено</string>
+    <string name="input_state_no_signal">Нет сигнала</string>
+    <string name="input_state_disconnected">Не подключено</string>
+    <string name="input_state_unknown">—</string>
+    <string name="inputs_none">Входы не найдены</string>
 </resources>

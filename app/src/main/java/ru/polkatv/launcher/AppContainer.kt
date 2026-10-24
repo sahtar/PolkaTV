@@ -14,6 +14,8 @@ import ru.polkatv.launcher.apps.TileArtLoader
 import ru.polkatv.launcher.settings.Prefs
 import ru.polkatv.launcher.settings.SettingsRepository
 import ru.polkatv.launcher.settings.polkaDataStore
+import ru.polkatv.launcher.system.InputsController
+import ru.polkatv.launcher.system.NetworkStatus
 import ru.polkatv.launcher.system.SystemActions
 import ru.polkatv.launcher.wallpaper.WallpaperController
 import ru.polkatv.launcher.wallpaper.WallpaperLoader
@@ -33,6 +35,8 @@ class AppContainer(val appContext: Context) {
     val apps = AppsRepository(appContext, appScope)
     val tileArt = TileArtLoader(appContext)
     val system = SystemActions(appContext)
+    val network = NetworkStatus(appContext)
+    val inputs = InputsController(appContext, system)
     val httpClient = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).retryOnConnectionFailure(true).build()
     val weather = WeatherRepository(OpenMeteoApi(httpClient), WeatherCache(File(appContext.filesDir, "weather")))
 }
