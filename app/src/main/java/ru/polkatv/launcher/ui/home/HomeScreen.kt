@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,12 +17,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.polkatv.launcher.AppContainer
+import ru.polkatv.launcher.R
 import ru.polkatv.launcher.apps.TileSlot
 import ru.polkatv.launcher.system.NetState
 import ru.polkatv.launcher.ui.apps.AppPickerDialog
 import ru.polkatv.launcher.ui.theme.Dimens
+import ru.polkatv.launcher.ui.weather.AddCityDialog
 
 @Composable
 fun HomeScreen(
@@ -29,7 +33,7 @@ fun HomeScreen(
     container: AppContainer,
     headerActions: HeaderActions,
     onOpenAllApps: () -> Unit,
-    weatherShelf: @Composable (Modifier) -> Unit,
+    onOpenWeather: (Int) -> Unit,
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val wallpaper by container.wallpapers.current.collectAsStateWithLifecycle()
@@ -37,6 +41,11 @@ fun HomeScreen(
     val tiers = remember { TierFocus() }
     var menuFor by remember { mutableStateOf<TileSlot.App?>(null) }
     var pickFor by remember { mutableStateOf<Int?>(null) }
+    var cityMenu by remember { mutableStateOf(false) }
+    var addCity by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { vm.startWeatherLoop() }
+    DisposableEffect(Unit) { onDispose { vm.stopWeatherLoop() } }
 
     LaunchedEffect(state.tiles.isNotEmpty()) {
         if (state.tiles.isNotEmpty()) runCatching { firstTileFocus.requestFocus() }
@@ -45,7 +54,7 @@ fun HomeScreen(
     Box(Modifier.fillMaxSize()) {
         WallpaperBackground(bitmap = wallpaper, dimStrength = state.prefs.dimLevel.strength)
         Column(Modifier.fillMaxSize().padding(horizontal = Dimens.safeH, vertical = Dimens.safeV)) {
-            Box(Modifier.tierExits(up = null, down = tiers.row)) {
+            Box(Modifier.tierExits(up = null, down = tiers.shelf)) {
                 Header(
                     clockFormat = state.prefs.clockFormat,
                     showDate = state.prefs.showDate,
@@ -55,9 +64,18 @@ fun HomeScreen(
                 )
             }
             Spacer(Modifier.height(Dimens.tierGap))
-            weatherShelf(Modifier.weight(1f).fillMaxWidth().focusRequester(tiers.shelf))
+            Box(Modifier.weight(1f).fillMaxWidth().tierExits(up = tiers.header, down = tiers.row)) {
+                WeatherShelf(
+                    cities = state.cities, selected = state.selectedCity,
+                    onSelect = vm::selectCity,
+                    onOpenDetail = { onOpenWeather(state.selectedCity) },
+                    onLongPress = { cityMenu = true },
+                    onAddCity = { addCity = true },
+                    modifier = Modifier.fillMaxSize().focusRequester(tiers.shelf),
+                )
+            }
             Spacer(Modifier.height(Dimens.tierGap))
-            Box(Modifier.tierExits(up = tiers.header, down = null)) {
+            Box(Modifier.tierExits(up = tiers.shelf, down = null)) {
                 AppRow(
                     tiles = state.tiles,
                     artLoader = container.tileArt,
@@ -83,4 +101,16 @@ fun HomeScreen(
     pickFor?.let { index ->
         AppPickerDialog(apps = state.apps, onPick = { vm.replaceTile(index, it.packageName); pickFor = null }, onDismiss = { pickFor = null })
     }
+    if (cityMenu) {
+        val current = state.cities.getOrNull(state.selectedCity)
+        CityMenuDialog(
+            title = current?.city?.displayName ?: stringResource(R.string.add_city_title),
+            hasCity = current != null, canAdd = state.cities.size < 6,
+            onAdd = { cityMenu = false; addCity = true },
+            onRemove = { vm.removeCity(state.selectedCity); cityMenu = false },
+            onMakeFirst = { vm.makeCityFirst(state.selectedCity); cityMenu = false },
+            onDismiss = { cityMenu = false },
+        )
+    }
+    if (addCity) AddCityDialog(search = { vm.searchCities(it) }, onPick = { vm.addCity(it); addCity = false }, onDismiss = { addCity = false })
 }

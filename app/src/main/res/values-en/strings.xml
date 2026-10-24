@@ -21,4 +21,61 @@
     <string name="tile_n">Tile %1$d: %2$s</string>
     <string name="tile_n_empty">Tile %1$d: empty</string>
     <string name="unavailable_on_tv">Not available on this TV</string>
+    <!-- weather descriptions -->
+    <string name="wx_clear">Clear</string>
+    <string name="wx_mainly_clear">Mainly clear</string>
+    <string name="wx_partly_cloudy">Partly cloudy</string>
+    <string name="wx_overcast">Overcast</string>
+    <string name="wx_fog">Fog</string>
+    <string name="wx_drizzle_light">Light drizzle</string>
+    <string name="wx_drizzle">Drizzle</string>
+    <string name="wx_drizzle_dense">Dense drizzle</string>
+    <string name="wx_freezing_drizzle">Freezing drizzle</string>
+    <string name="wx_rain_light">Light rain</string>
+    <string name="wx_rain">Rain</string>
+    <string name="wx_rain_heavy">Heavy rain</string>
+    <string name="wx_freezing_rain">Freezing rain</string>
+    <string name="wx_snow_light">Light snow</string>
+    <string name="wx_snow">Snow</string>
+    <string name="wx_snow_heavy">Heavy snow</string>
+    <string name="wx_snow_grains">Snow grains</string>
+    <string name="wx_showers_light">Light showers</string>
+    <string name="wx_showers">Showers</string>
+    <string name="wx_showers_violent">Violent showers</string>
+    <string name="wx_snow_showers_light">Light snow showers</string>
+    <string name="wx_snow_showers_heavy">Heavy snow showers</string>
+    <string name="wx_thunderstorm">Thunderstorm</string>
+    <string name="wx_thunderstorm_hail">Thunderstorm with hail</string>
+    <string name="wx_unknown">No data</string>
+    <!-- wind -->
+    <string name="wind_n">N</string><string name="wind_ne">NE</string><string name="wind_e">E</string><string name="wind_se">SE</string>
+    <string name="wind_s">S</string><string name="wind_sw">SW</string><string name="wind_w">W</string><string name="wind_nw">NW</string>
+    <!-- shelf -->
+    <string name="wx_feels">Feels like</string>
+    <string name="wx_wind">Wind</string>
+    <string name="wx_humidity">Humidity</string>
+    <string name="wx_pressure">Pressure</string>
+    <string name="wx_precip">Precipitation</string>
+    <string name="unit_ms">%1$s m/s</string>
+    <string name="unit_mmhg">%1$d mmHg</string>
+    <string name="unit_percent">%1$d%%</string>
+    <string name="unit_temp">%1$s°</string>
+    <string name="wx_updated_ago">updated %1$s ago</string>
+    <string name="ago_minutes">%1$d min</string>
+    <string name="ago_hours">%1$d h</string>
+    <string name="ago_days">%1$d d</string>
+    <string name="wx_no_data">No data, check the network</string>
+    <string name="wx_add_city_prompt">Add a city to see the weather</string>
+    <string name="city_menu_add">Add city</string>
+    <string name="city_menu_remove">Remove this city</string>
+    <string name="city_menu_first">Make first</string>
+    <string name="add_city_title">Add city</string>
+    <string name="add_city_hint">City name</string>
+    <string name="add_city_no_network">No connection</string>
+    <string name="add_city_nothing">Nothing found</string>
+    <string name="wx_detail_hourly">Hourly forecast</string>
+    <string name="wx_detail_daily">7-day forecast</string>
+    <string name="wx_sunrise">Sunrise %1$s</string>
+    <string name="wx_sunset">Sunset %1$s</string>
+    <string name="wx_today">Today</string>
 </resources>

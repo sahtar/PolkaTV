@@ -1,25 +1,24 @@
 package ru.polkatv.launcher.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ru.polkatv.launcher.AppContainer
 import ru.polkatv.launcher.ui.apps.AllAppsScreen
 import ru.polkatv.launcher.ui.apps.AllAppsViewModel
 import ru.polkatv.launcher.ui.home.HeaderActions
 import ru.polkatv.launcher.ui.home.HomeScreen
 import ru.polkatv.launcher.ui.home.HomeViewModel
-import ru.polkatv.launcher.ui.theme.GlassFill
+import ru.polkatv.launcher.ui.weather.WeatherDetailScreen
+import ru.polkatv.launcher.weather.CityWeather
 
 object Routes {
     const val HOME = "home"
@@ -40,12 +39,19 @@ fun PolkaApp(container: AppContainer) {
                 container = container,
                 headerActions = HeaderActions({}, {}, {}, {}, {}),   // wired in Task 9/10
                 onOpenAllApps = { nav.navigate(Routes.ALL_APPS) },  // screen arrives in Task 6
-                weatherShelf = { m -> Box(m.background(GlassFill, RoundedCornerShape(24.dp))) },   // Task 8 replaces
+                onOpenWeather = { nav.navigate(Routes.weather(it)) },
             )
         }
         composable(Routes.ALL_APPS) {
             val vm: AllAppsViewModel = viewModel(factory = viewModelFactory { initializer { AllAppsViewModel(container) } })
             AllAppsScreen(vm = vm, container = container, onBack = { nav.popBackStack() })
+        }
+        composable(Routes.WEATHER, arguments = listOf(navArgument("index") { type = NavType.IntType })) { entry ->
+            val index = entry.arguments?.getInt("index") ?: 0
+            val prefs by container.prefs.collectAsStateWithLifecycle()
+            val states by container.weather.states.collectAsStateWithLifecycle()
+            val city = prefs.cities.getOrNull(index)
+            WeatherDetailScreen(cityWeather = city?.let { states[it.key] ?: CityWeather(it) }, onBack = { nav.popBackStack() })
         }
     }
 }

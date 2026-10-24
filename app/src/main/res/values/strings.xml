@@ -21,4 +21,61 @@
     <string name="tile_n">Плитка %1$d: %2$s</string>
     <string name="tile_n_empty">Плитка %1$d: пусто</string>
     <string name="unavailable_on_tv">Недоступно на этом телевизоре</string>
+    <!-- weather descriptions -->
+    <string name="wx_clear">Ясно</string>
+    <string name="wx_mainly_clear">Преимущественно ясно</string>
+    <string name="wx_partly_cloudy">Переменная облачность</string>
+    <string name="wx_overcast">Облачно</string>
+    <string name="wx_fog">Туман</string>
+    <string name="wx_drizzle_light">Слабая морось</string>
+    <string name="wx_drizzle">Морось</string>
+    <string name="wx_drizzle_dense">Сильная морось</string>
+    <string name="wx_freezing_drizzle">Ледяная морось</string>
+    <string name="wx_rain_light">Небольшой дождь</string>
+    <string name="wx_rain">Дождь</string>
+    <string name="wx_rain_heavy">Сильный дождь</string>
+    <string name="wx_freezing_rain">Ледяной дождь</string>
+    <string name="wx_snow_light">Небольшой снег</string>
+    <string name="wx_snow">Снег</string>
+    <string name="wx_snow_heavy">Сильный снег</string>
+    <string name="wx_snow_grains">Снежные зёрна</string>
+    <string name="wx_showers_light">Небольшой ливень</string>
+    <string name="wx_showers">Ливень</string>
+    <string name="wx_showers_violent">Сильный ливень</string>
+    <string name="wx_snow_showers_light">Небольшой снегопад</string>
+    <string name="wx_snow_showers_heavy">Сильный снегопад</string>
+    <string name="wx_thunderstorm">Гроза</string>
+    <string name="wx_thunderstorm_hail">Гроза с градом</string>
+    <string name="wx_unknown">Нет данных</string>
+    <!-- wind -->
+    <string name="wind_n">С</string><string name="wind_ne">СВ</string><string name="wind_e">В</string><string name="wind_se">ЮВ</string>
+    <string name="wind_s">Ю</string><string name="wind_sw">ЮЗ</string><string name="wind_w">З</string><string name="wind_nw">СЗ</string>
+    <!-- shelf -->
+    <string name="wx_feels">Ощущается</string>
+    <string name="wx_wind">Ветер</string>
+    <string name="wx_humidity">Влажность</string>
+    <string name="wx_pressure">Давление</string>
+    <string name="wx_precip">Осадки</string>
+    <string name="unit_ms">%1$s м/с</string>
+    <string name="unit_mmhg">%1$d мм</string>
+    <string name="unit_percent">%1$d%%</string>
+    <string name="unit_temp">%1$s°</string>
+    <string name="wx_updated_ago">обновлено %1$s назад</string>
+    <string name="ago_minutes">%1$d мин</string>
+    <string name="ago_hours">%1$d ч</string>
+    <string name="ago_days">%1$d дн</string>
+    <string name="wx_no_data">Нет данных, проверьте сеть</string>
+    <string name="wx_add_city_prompt">Добавьте город, чтобы видеть погоду</string>
+    <string name="city_menu_add">Добавить город</string>
+    <string name="city_menu_remove">Удалить этот город</string>
+    <string name="city_menu_first">Сделать первым</string>
+    <string name="add_city_title">Добавить город</string>
+    <string name="add_city_hint">Название города</string>
+    <string name="add_city_no_network">Нет связи</string>
+    <string name="add_city_nothing">Ничего не найдено</string>
+    <string name="wx_detail_hourly">Почасовой прогноз</string>
+    <string name="wx_detail_daily">На 7 дней</string>
+    <string name="wx_sunrise">Восход %1$s</string>
+    <string name="wx_sunset">Закат %1$s</string>
+    <string name="wx_today">Сегодня</string>
 </resources>

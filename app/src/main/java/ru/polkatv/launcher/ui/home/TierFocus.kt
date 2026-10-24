@@ -11,9 +11,8 @@ import androidx.compose.ui.focus.focusProperties
  * Focus requesters for the three vertical tiers of the home screen (spec 4.2):
  * [header] (service icons, top), [shelf] (weather shelf, middle) and [row] (app tiles, bottom).
  *
- * The shelf is not focusable yet, so Up/Down currently skip it. Task 8 makes the shelf focusable
- * (attach [shelf] to its focus group) and switches the header's `down` and the row's `up`
- * targets in HomeScreen to [shelf], and gives the shelf its own [tierExits].
+ * Down from the header lands on the shelf, then on the row; Up from the row lands on the shelf,
+ * then on the header. [shelf] is attached to the weather card, which sits in its own [tierExits].
  */
 class TierFocus {
     val header = FocusRequester()
