@@ -4518,3 +4518,440 @@ Then tell the user the branch `design/polkatv-spec` holds everything and ask whe
 | §6.1 HOME + reboot (+fallback receiver), §9 checks 7–9, §10 release, README | 11 |
 
 Type consistency notes checked while writing: `TileSlot`/`TileResolver` (Task 4) are used unchanged in Tasks 5, 6, 10; `HeaderActions` (Task 5) built inside `HomeScreen` from Task 9 on; `CityWeather`/`WeatherRepository.FRESH_MS` (Task 7) used in Task 8; `AppPickerDialog` gains `extraAction` in Task 10 — if executing Task 10 before adjusting, add the parameter with a default so Task 5/6 call sites keep compiling; `NetState` enum lives in `system/NetworkStatus.kt` from Task 5 and the producing class is added in Task 9.
+
+---
+
+### Task 12: OpenWeatherMap as the forecast source (executed last, after Task 11 — user decision 2026-10-24)
+
+Amendment 2026-10-24: `api.open-meteo.com` is unreachable from the TV's ISP (TCP 443 to 157.90.83.168 times out), while `geocoding-api.open-meteo.com` and `api.openweathermap.org` are reachable. The user chose OpenWeatherMap (free tier, API key supplied by the user). Geocoding stays on Open-Meteo (verified to find Russian towns: Кукмор, Апатиты, Пятигорск, Шуя). Implements the amended spec §7. Deliverable: the shelf and detail screen show live weather on the TV through OpenWeatherMap; Open-Meteo's forecast client is kept only as a fallback-free reference (not called).
+
+Design: the existing canonical DTO `ForecastResponse` (Open-Meteo shaped: `current`, `hourly` arrays, `daily` arrays) stays the internal contract of `WeatherRepository`, `WeatherCache` and `WeatherMapper`, so none of them change. A new `OwmApi` fetches `/data/2.5/weather` (current) and `/data/2.5/forecast` (5 days, 3-hour steps) and `OwmAdapter` converts both into one `ForecastResponse`: OWM condition ids → WMO codes (`OwmCodes`), 3-hourly items → the `hourly` arrays, daily min/max/pop/code → `daily` grouped by local date, `city.sunrise/sunset` → ISO strings, `timezone` offset → `"+03:00"`-style zone id. The UI keeps its WMO strings and icons. Shelf chips therefore step by 3 hours (8 chips ≈ 24 h), the detail "hourly" strip shows up to 24 items (≈ 72 h) and the daily list has up to 6 days.
+
+**Files:**
+- Create: `app/src/main/java/ru/polkatv/launcher/weather/OwmDto.kt`, `weather/OwmCodes.kt`, `weather/OwmAdapter.kt`, `weather/OwmApi.kt`; tests `app/src/test/java/ru/polkatv/launcher/weather/{OwmCodesTest,OwmAdapterTest,OwmApiTest}.kt`; fixtures `app/src/test/resources/openmeteo/owm_weather_sample.json`, `app/src/test/resources/openmeteo/owm_forecast_sample.json`
+- Modify: `app/build.gradle.kts` (BuildConfig key), `AppContainer.kt` (wire `OwmApi`), `ui/home/WeatherShelf.kt` (missing-key message), `res/values/strings.xml`, `res/values-en/strings.xml`, `local.properties` (git-ignored; `owm.apiKey=…`)
+
+**Interfaces:**
+- Consumes: `WeatherApi` (Task 7), `ForecastResponse/CurrentDto/HourlyDto/DailyDto` (Task 7), `OpenMeteoApi.search` (Task 7, kept for geocoding), `WeatherRepository` constructor.
+- Produces: `object OwmCodes { fun toWmo(owmId: Int): Int }`; `object OwmAdapter { fun toForecastResponse(current: OwmCurrentDto, forecast: OwmForecastDto): ForecastResponse }`; `class OwmApi(client: OkHttpClient, apiKey: String, geocoder: WeatherApi, base: String = "https://api.openweathermap.org") : WeatherApi`; `BuildConfig.OWM_API_KEY: String`.
+
+- [ ] **Step 1: Key plumbing**
+
+Append to `local.properties` (git-ignored): `owm.apiKey=<the key the user provided>` (the controller writes this line; never print the key).
+
+In `app/build.gradle.kts`, next to `keystoreProps`, add:
+```kotlin
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+```
+inside `defaultConfig { … }` add:
+```kotlin
+        buildConfigField("String", "OWM_API_KEY", "\"${localProps.getProperty("owm.apiKey", "")}\"")
+```
+and in `buildFeatures { compose = true }` add `buildConfig = true`.
+
+- [ ] **Step 2: Fixtures**
+
+`app/src/test/resources/openmeteo/owm_weather_sample.json` (Moscow, 2026-10-24 21:30 MSK = 18:30 UTC; sunrise 07:21 / sunset 17:02 MSK):
+```json
+{"coord":{"lon":37.6173,"lat":55.7558},
+ "weather":[{"id":500,"main":"Rain","description":"небольшой дождь","icon":"10n"}],
+ "main":{"temp":7.3,"feels_like":4.9,"temp_min":6.8,"temp_max":7.9,"pressure":1003,"sea_level":1003,"grnd_level":985,"humidity":81},
+ "wind":{"speed":6.1,"deg":250},
+ "clouds":{"all":90},
+ "dt":1792693800,
+ "sys":{"country":"RU","sunrise":1792642860,"sunset":1792677720},
+ "timezone":10800,"id":524901,"name":"Москва","cod":200}
+```
+`app/src/test/resources/openmeteo/owm_forecast_sample.json` (eight 3-hour items: 21:00 MSK on 2026-10-24 through 18:00 MSK on 2026-10-25):
+```json
+{"cod":"200","cnt":8,
+ "list":[
+  {"dt":1792692000,"main":{"temp":7.4,"feels_like":5.0,"temp_min":7.0,"temp_max":7.4,"pressure":1003,"humidity":80},"weather":[{"id":500,"main":"Rain","description":"небольшой дождь","icon":"10n"}],"pop":0.65,"sys":{"pod":"n"},"dt_txt":"2026-10-24 18:00:00"},
+  {"dt":1792702800,"main":{"temp":6.1,"feels_like":3.9,"temp_min":5.8,"temp_max":6.1,"pressure":1004,"humidity":84},"weather":[{"id":804,"main":"Clouds","description":"пасмурно","icon":"04n"}],"pop":0.30,"sys":{"pod":"n"},"dt_txt":"2026-10-24 21:00:00"},
+  {"dt":1792713600,"main":{"temp":5.0,"feels_like":2.7,"temp_min":4.6,"temp_max":5.0,"pressure":1005,"humidity":86},"weather":[{"id":803,"main":"Clouds","description":"облачно с прояснениями","icon":"04n"}],"pop":0.10,"sys":{"pod":"n"},"dt_txt":"2026-10-25 00:00:00"},
+  {"dt":1792724400,"main":{"temp":4.2,"feels_like":1.8,"temp_min":4.0,"temp_max":4.2,"pressure":1006,"humidity":88},"weather":[{"id":801,"main":"Clouds","description":"небольшая облачность","icon":"02n"}],"pop":0.0,"sys":{"pod":"n"},"dt_txt":"2026-10-25 03:00:00"},
+  {"dt":1792735200,"main":{"temp":3.7,"feels_like":1.2,"temp_min":3.7,"temp_max":4.4,"pressure":1007,"humidity":85},"weather":[{"id":800,"main":"Clear","description":"ясно","icon":"01d"}],"pop":0.0,"sys":{"pod":"d"},"dt_txt":"2026-10-25 06:00:00"},
+  {"dt":1792746000,"main":{"temp":6.5,"feels_like":4.0,"temp_min":6.5,"temp_max":7.2,"pressure":1007,"humidity":70},"weather":[{"id":802,"main":"Clouds","description":"переменная облачность","icon":"03d"}],"pop":0.05,"sys":{"pod":"d"},"dt_txt":"2026-10-25 09:00:00"},
+  {"dt":1792756800,"main":{"temp":8.0,"feels_like":5.9,"temp_min":8.0,"temp_max":8.0,"pressure":1006,"humidity":62},"weather":[{"id":500,"main":"Rain","description":"небольшой дождь","icon":"10d"}],"pop":0.45,"sys":{"pod":"d"},"dt_txt":"2026-10-25 12:00:00"},
+  {"dt":1792767600,"main":{"temp":6.9,"feels_like":4.6,"temp_min":6.9,"temp_max":6.9,"pressure":1005,"humidity":71},"weather":[{"id":501,"main":"Rain","description":"дождь","icon":"10n"}],"pop":0.80,"sys":{"pod":"n"},"dt_txt":"2026-10-25 15:00:00"}
+ ],
+ "city":{"id":524901,"name":"Москва","coord":{"lat":55.7558,"lon":37.6173},"country":"RU","timezone":10800,"sunrise":1792642860,"sunset":1792677720}}
+```
+(All `dt` values are UTC epoch seconds; with `timezone=10800` the first forecast item is 2026-10-24T21:00 local, the current observation 21:30 local. Verify once in a test: `LocalDateTime.ofEpochSecond(1792692000, 0, ZoneOffset.ofTotalSeconds(10800))` must print `2026-10-24T21:00`; if the arithmetic in this fixture is off by an hour, fix the fixture's `dt` values, not the adapter.)
+
+- [ ] **Step 3: Failing tests**
+
+`OwmCodesTest.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class OwmCodesTest {
+    @Test fun `owm ids map to wmo codes`() {
+        assertEquals(95, OwmCodes.toWmo(200)); assertEquals(95, OwmCodes.toWmo(211)); assertEquals(95, OwmCodes.toWmo(232))
+        assertEquals(51, OwmCodes.toWmo(300)); assertEquals(53, OwmCodes.toWmo(301)); assertEquals(55, OwmCodes.toWmo(302)); assertEquals(53, OwmCodes.toWmo(321))
+        assertEquals(61, OwmCodes.toWmo(500)); assertEquals(63, OwmCodes.toWmo(501)); assertEquals(65, OwmCodes.toWmo(502)); assertEquals(65, OwmCodes.toWmo(504))
+        assertEquals(66, OwmCodes.toWmo(511))
+        assertEquals(80, OwmCodes.toWmo(520)); assertEquals(81, OwmCodes.toWmo(521)); assertEquals(82, OwmCodes.toWmo(522)); assertEquals(82, OwmCodes.toWmo(531))
+        assertEquals(71, OwmCodes.toWmo(600)); assertEquals(73, OwmCodes.toWmo(601)); assertEquals(75, OwmCodes.toWmo(602))
+        assertEquals(77, OwmCodes.toWmo(611)); assertEquals(77, OwmCodes.toWmo(613))
+        assertEquals(85, OwmCodes.toWmo(615)); assertEquals(85, OwmCodes.toWmo(620)); assertEquals(86, OwmCodes.toWmo(621)); assertEquals(86, OwmCodes.toWmo(622))
+        assertEquals(45, OwmCodes.toWmo(701)); assertEquals(45, OwmCodes.toWmo(741)); assertEquals(45, OwmCodes.toWmo(761))
+        assertEquals(82, OwmCodes.toWmo(771)); assertEquals(95, OwmCodes.toWmo(781))
+        assertEquals(0, OwmCodes.toWmo(800)); assertEquals(1, OwmCodes.toWmo(801)); assertEquals(2, OwmCodes.toWmo(802)); assertEquals(2, OwmCodes.toWmo(803)); assertEquals(3, OwmCodes.toWmo(804))
+        assertEquals(3, OwmCodes.toWmo(999))
+    }
+}
+```
+`OwmAdapterTest.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+import kotlinx.serialization.json.Json
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
+class OwmAdapterTest {
+    private val json = Json { ignoreUnknownKeys = true }
+    private val cur = json.decodeFromString<OwmCurrentDto>(javaClass.getResource("/openmeteo/owm_weather_sample.json")!!.readText())
+    private val fc = json.decodeFromString<OwmForecastDto>(javaClass.getResource("/openmeteo/owm_forecast_sample.json")!!.readText())
+    private val r = OwmAdapter.toForecastResponse(cur, fc)
+
+    @Test fun `fixture epoch arithmetic`() {
+        assertEquals(LocalDateTime.of(2026, 10, 24, 21, 0), LocalDateTime.ofEpochSecond(1792692000L, 0, ZoneOffset.ofTotalSeconds(10800)))
+    }
+
+    @Test fun `current is converted with wmo code, local time, night flag`() {
+        assertEquals("2026-10-24T21:30:00", r.current.time)
+        assertEquals(7.3, r.current.temperature, 0.001); assertEquals(4.9, r.current.apparent, 0.001)
+        assertEquals(81, r.current.humidity); assertEquals(1003.0, r.current.pressureMsl, 0.001)
+        assertEquals(6.1, r.current.windSpeed, 0.001); assertEquals(250.0, r.current.windDirection, 0.001)
+        assertEquals(61, r.current.code); assertEquals(0, r.current.isDay)
+        assertEquals(10800, r.utcOffsetSeconds); assertEquals("+03:00", r.timezone)
+    }
+
+    @Test fun `hourly arrays come from the 3-hour items`() {
+        assertEquals(8, r.hourly.time.size)
+        assertEquals("2026-10-24T21:00:00", r.hourly.time[0]); assertEquals("2026-10-25T18:00:00", r.hourly.time[7])
+        assertEquals(7.4, r.hourly.temperature[0], 0.001)
+        assertEquals(listOf(61, 3, 2, 1, 0, 2, 61, 63), r.hourly.code)
+        assertEquals(listOf(65, 30, 10, 0, 0, 5, 45, 80), r.hourly.precipProbability)
+        assertEquals(listOf(0, 0, 0, 0, 1, 1, 1, 0), r.hourly.isDay)
+    }
+
+    @Test fun `daily is grouped by local date with min max pop and a midday code`() {
+        assertEquals(listOf("2026-10-24", "2026-10-25"), r.daily.time)
+        assertEquals(7.0, r.daily.tMin[0], 0.001); assertEquals(7.4, r.daily.tMax[0], 0.001)
+        assertEquals(3.7, r.daily.tMin[1], 0.001); assertEquals(8.0, r.daily.tMax[1], 0.001)
+        assertEquals(listOf(65, 80), r.daily.precipProbabilityMax)
+        assertEquals(61, r.daily.code[0])      // only item of the day
+        assertEquals(61, r.daily.code[1])      // item closest to 13:00 local is 12:00 → id 500 → 61
+        assertEquals("2026-10-24T07:21:00", r.daily.sunrise[0]); assertEquals("2026-10-25T17:02:00", r.daily.sunset[1])
+    }
+
+    @Test fun `mapper accepts the adapted response`() {
+        val w = WeatherMapper.map(r, 1L, LocalDateTime.of(2026, 10, 24, 21, 30))
+        assertEquals(61, w.current.code); assertEquals(65, w.current.precipProbability)
+        assertEquals(8, w.hourly.size); assertEquals(2, w.daily.size)
+        assertEquals(java.time.LocalTime.of(7, 21), w.daily[0].sunrise)
+    }
+
+    @Test fun `missing sunrise yields empty strings and null times`() {
+        val noSun = fc.copy(city = fc.city.copy(sunrise = null, sunset = null))
+        val r2 = OwmAdapter.toForecastResponse(cur.copy(sys = OwmSys()), noSun)
+        assertEquals("", r2.daily.sunrise[0])
+        assertNull(WeatherMapper.map(r2, 1L, LocalDateTime.of(2026, 10, 24, 21, 30)).daily[0].sunrise)
+        assertEquals(1, r2.current.isDay)   // unknown sunrise/sunset → assume day
+    }
+}
+```
+`OwmApiTest.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+import kotlinx.coroutines.test.runTest
+import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import java.io.IOException
+
+class OwmApiTest {
+    private lateinit var server: MockWebServer
+    private val geocoder = object : WeatherApi {
+        override suspend fun forecast(lat: Double, lon: Double): ForecastResponse = error("not used")
+        override suspend fun search(query: String): List<GeoResultDto> = listOf(GeoResultDto("Москва", 55.75, 37.62, "Россия", "Москва", "Europe/Moscow"))
+    }
+
+    @Before fun setUp() { server = MockWebServer(); server.start() }
+    @After fun tearDown() { server.shutdown() }
+
+    private fun api(key: String = "k123") = OwmApi(OkHttpClient(), key, geocoder, base = server.url("/").toString().trimEnd('/'))
+
+    @Test fun `forecast calls weather then forecast with key, metric units and russian`() = runTest {
+        server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_weather_sample.json")!!.readText()))
+        server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_forecast_sample.json")!!.readText()))
+        val r = api().forecast(55.7558, 37.6173)
+        val first = server.takeRequest().requestUrl!!; val second = server.takeRequest().requestUrl!!
+        assertEquals("/data/2.5/weather", first.encodedPath); assertEquals("/data/2.5/forecast", second.encodedPath)
+        for (u in listOf(first, second)) {
+            assertEquals("k123", u.queryParameter("appid")); assertEquals("metric", u.queryParameter("units")); assertEquals("ru", u.queryParameter("lang"))
+            assertEquals("55.7558", u.queryParameter("lat")); assertEquals("37.6173", u.queryParameter("lon"))
+        }
+        assertEquals(61, r.current.code); assertEquals(8, r.hourly.time.size)
+    }
+
+    @Test(expected = IOException::class)
+    fun `blank key fails fast without a request`() = runTest {
+        try { api(key = "").forecast(1.0, 2.0) } finally { assertEquals(0, server.requestCount) }
+    }
+
+    @Test(expected = IOException::class)
+    fun `http 401 throws IOException`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(401).setBody("{\"cod\":401,\"message\":\"Invalid API key\"}"))
+        api().forecast(1.0, 2.0)
+    }
+
+    @Test fun `search delegates to the geocoder`() = runTest {
+        assertEquals("Москва", api().search("Moskva").single().name)
+        assertEquals(0, server.requestCount)
+    }
+}
+```
+Run: `./gradlew --no-daemon testDebugUnitTest --tests "ru.polkatv.launcher.weather.Owm*"` → expected compilation FAILS (unresolved `OwmCodes`, `OwmAdapter`, `OwmApi`, `OwmCurrentDto`, …).
+
+- [ ] **Step 4: Implement**
+
+`weather/OwmDto.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class OwmCurrentDto(
+    val dt: Long,
+    val timezone: Int = 0,
+    val main: OwmMain,
+    val wind: OwmWind = OwmWind(),
+    val weather: List<OwmCondition> = emptyList(),
+    val sys: OwmSys = OwmSys(),
+)
+
+@Serializable
+data class OwmMain(
+    val temp: Double,
+    @SerialName("feels_like") val feelsLike: Double = temp,
+    val humidity: Int = 0,
+    val pressure: Double = 1013.25,
+    @SerialName("sea_level") val seaLevel: Double? = null,
+    @SerialName("temp_min") val tempMin: Double? = null,
+    @SerialName("temp_max") val tempMax: Double? = null,
+)
+
+@Serializable data class OwmWind(val speed: Double = 0.0, val deg: Double = 0.0)
+@Serializable data class OwmCondition(val id: Int, val main: String = "", val description: String = "")
+@Serializable data class OwmSys(val sunrise: Long? = null, val sunset: Long? = null, val pod: String? = null)
+
+@Serializable
+data class OwmForecastDto(val list: List<OwmForecastItem> = emptyList(), val city: OwmCity = OwmCity())
+
+@Serializable
+data class OwmForecastItem(
+    val dt: Long,
+    val main: OwmMain,
+    val weather: List<OwmCondition> = emptyList(),
+    val pop: Double = 0.0,
+    val sys: OwmSys = OwmSys(),
+)
+
+@Serializable data class OwmCity(val timezone: Int = 0, val sunrise: Long? = null, val sunset: Long? = null)
+```
+`weather/OwmCodes.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+/** OpenWeatherMap condition id → WMO code used by [WmoCodes] and the UI. */
+object OwmCodes {
+    fun toWmo(owmId: Int): Int = when (owmId) {
+        in 200..299 -> 95
+        300, 310 -> 51
+        301, 311, 313, 321 -> 53
+        302, 312, 314 -> 55
+        500 -> 61
+        501 -> 63
+        502, 503, 504 -> 65
+        511 -> 66
+        520 -> 80
+        521 -> 81
+        522, 531 -> 82
+        600 -> 71
+        601 -> 73
+        602 -> 75
+        611, 612, 613 -> 77
+        615, 616, 620 -> 85
+        621, 622 -> 86
+        in 700..762 -> 45
+        771 -> 82
+        781 -> 95
+        800 -> 0
+        801 -> 1
+        802, 803 -> 2
+        804 -> 3
+        else -> 3
+    }
+}
+```
+`weather/OwmAdapter.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import kotlin.math.abs
+import kotlin.math.roundToInt
+
+/** Converts the two OpenWeatherMap responses into the canonical [ForecastResponse]. */
+object OwmAdapter {
+    private val iso = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    fun toForecastResponse(current: OwmCurrentDto, forecast: OwmForecastDto): ForecastResponse {
+        val offset = ZoneOffset.ofTotalSeconds(current.timezone)
+        fun local(epoch: Long): LocalDateTime = LocalDateTime.ofEpochSecond(epoch, 0, offset)
+
+        val sunrise = current.sys.sunrise ?: forecast.city.sunrise
+        val sunset = current.sys.sunset ?: forecast.city.sunset
+        val isDayNow = if (sunrise != null && sunset != null) current.dt in sunrise..sunset else true
+        val cur = CurrentDto(
+            time = iso.format(local(current.dt)),
+            temperature = current.main.temp,
+            humidity = current.main.humidity,
+            apparent = current.main.feelsLike,
+            isDay = if (isDayNow) 1 else 0,
+            precipitation = 0.0,
+            code = OwmCodes.toWmo(current.weather.firstOrNull()?.id ?: 800),
+            pressureMsl = current.main.seaLevel ?: current.main.pressure,
+            windSpeed = current.wind.speed,
+            windDirection = current.wind.deg,
+        )
+
+        val items = forecast.list.sortedBy { it.dt }
+        val hourly = HourlyDto(
+            time = items.map { iso.format(local(it.dt)) },
+            temperature = items.map { it.main.temp },
+            code = items.map { OwmCodes.toWmo(it.weather.firstOrNull()?.id ?: 800) },
+            precipProbability = items.map { (it.pop * 100).roundToInt() },
+            isDay = items.map { if (it.sys.pod == "n") 0 else 1 },
+        )
+
+        val sunriseTime: LocalTime? = sunrise?.let { local(it).toLocalTime() }
+        val sunsetTime: LocalTime? = sunset?.let { local(it).toLocalTime() }
+        val byDay: Map<LocalDate, List<OwmForecastItem>> = items.groupBy { local(it.dt).toLocalDate() }.toSortedMap()
+        fun sunString(date: LocalDate, t: LocalTime?) = t?.let { iso.format(LocalDateTime.of(date, it)) } ?: ""
+        val daily = DailyDto(
+            time = byDay.keys.map { it.toString() },
+            code = byDay.values.map { day -> OwmCodes.toWmo(representative(day, offset).weather.firstOrNull()?.id ?: 800) },
+            tMax = byDay.values.map { day -> day.maxOf { it.main.tempMax ?: it.main.temp } },
+            tMin = byDay.values.map { day -> day.minOf { it.main.tempMin ?: it.main.temp } },
+            sunrise = byDay.keys.map { sunString(it, sunriseTime) },
+            sunset = byDay.keys.map { sunString(it, sunsetTime) },
+            precipProbabilityMax = byDay.values.map { day -> day.maxOf { (it.pop * 100).roundToInt() } },
+        )
+        return ForecastResponse(utcOffsetSeconds = current.timezone, timezone = offset.id, current = cur, hourly = hourly, daily = daily)
+    }
+
+    /** The item closest to 13:00 local time represents the day's weather. */
+    private fun representative(day: List<OwmForecastItem>, offset: ZoneOffset): OwmForecastItem =
+        day.minByOrNull { abs(LocalDateTime.ofEpochSecond(it.dt, 0, offset).hour - 13) } ?: day.first()
+}
+```
+`weather/OwmApi.kt`:
+```kotlin
+package ru.polkatv.launcher.weather
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
+import java.util.Locale
+
+/**
+ * OpenWeatherMap forecast source (free tier: current weather + 5-day/3-hour forecast).
+ * City search is delegated to [geocoder] (Open-Meteo geocoding, reachable from the TV's network).
+ */
+class OwmApi(
+    private val client: OkHttpClient,
+    private val apiKey: String,
+    private val geocoder: WeatherApi,
+    private val base: String = "https://api.openweathermap.org",
+) : WeatherApi {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    override suspend fun forecast(lat: Double, lon: Double): ForecastResponse {
+        if (apiKey.isBlank()) throw IOException("OpenWeatherMap API key is not configured (owm.apiKey in local.properties)")
+        val current = json.decodeFromString<OwmCurrentDto>(get(url("/data/2.5/weather", lat, lon)))
+        val forecast = json.decodeFromString<OwmForecastDto>(get(url("/data/2.5/forecast", lat, lon)))
+        return OwmAdapter.toForecastResponse(current, forecast)
+    }
+
+    override suspend fun search(query: String): List<GeoResultDto> = geocoder.search(query)
+
+    private fun url(path: String, lat: Double, lon: Double): String =
+        "$base$path".toHttpUrl().newBuilder()
+            .addQueryParameter("lat", String.format(Locale.US, "%.4f", lat))
+            .addQueryParameter("lon", String.format(Locale.US, "%.4f", lon))
+            .addQueryParameter("units", "metric")
+            .addQueryParameter("lang", "ru")
+            .addQueryParameter("appid", apiKey)
+            .build().toString()
+
+    private suspend fun get(url: String): String = withContext(Dispatchers.IO) {
+        client.newCall(Request.Builder().url(url).header("User-Agent", "PolkaTV/0.1").build()).execute().use { resp ->
+            if (!resp.isSuccessful) throw IOException("HTTP ${resp.code} from OpenWeatherMap ${url.substringBefore("?")}")
+            resp.body?.string() ?: throw IOException("Empty body from OpenWeatherMap")
+        }
+    }
+}
+```
+`AppContainer.kt`: replace the `weather` line with
+```kotlin
+val weather = WeatherRepository(
+    OwmApi(httpClient, BuildConfig.OWM_API_KEY, geocoder = OpenMeteoApi(httpClient)),
+    WeatherCache(File(appContext.filesDir, "weather")),
+)
+```
+(import `ru.polkatv.launcher.BuildConfig`). Add a KDoc line on `OpenMeteoApi` saying its `forecast` endpoint is unreachable from the target network and only `search` is used.
+
+Strings: add `wx_no_api_key` = «Не задан ключ OpenWeatherMap» / "OpenWeatherMap API key is not set"; change `wx_detail_hourly` to «Прогноз по часам» / "Forecast by hours". In `WeatherShelf.kt`, where the error text is chosen (`if (current.error) R.string.wx_no_data else R.string.wx_unknown`), show `R.string.wx_no_api_key` first when `BuildConfig.OWM_API_KEY.isBlank()`.
+
+- [ ] **Step 5: Tests green, build, device**
+
+Run: `./gradlew --no-daemon testDebugUnitTest --tests "ru.polkatv.launcher.weather.*"` → previous 25 + 11 new pass; then full `testDebugUnitTest assembleDebug` → green. Then `tools/install_tv.sh`, wake the TV, and verify on the shelf that Москва shows a temperature and 8 chips 3 hours apart within ~15 s (`adb logcat -d | grep -iE "Polka|OpenWeather"` must show no HTTP 401); open the detail screen and confirm up to 6 daily rows with sunrise/sunset; screenshot both. If the key is missing in `local.properties`, the shelf must read «Не задан ключ OpenWeatherMap» — verify that state once by building with the key line commented out only if the key has not been provided yet.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add -A && git status --short   # local.properties must NOT be listed
+git commit -m "feat: OpenWeatherMap forecast source behind the canonical ForecastResponse
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+Follow-up for Task 11's README: document `owm.apiKey=…` in `local.properties` and the free-tier limits (60 calls/min; the launcher makes 2 calls per city every 30 min).
