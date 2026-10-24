@@ -668,7 +668,6 @@ package ru.polkatv.launcher.wallpaper
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.random.Random
 
@@ -696,7 +695,6 @@ class WallpaperSequenceTest {
         val seq = WallpaperSequence(count = 5, random = Random(11))
         var prev = seq.next()
         repeat(200) { val n = seq.next(); assertNotEquals(prev, n); prev = n }
-        assertTrue(true)
     }
 }
 ```
