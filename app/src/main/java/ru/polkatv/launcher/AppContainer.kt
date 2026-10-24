@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import ru.polkatv.launcher.apps.AppsRepository
+import ru.polkatv.launcher.apps.TileArtLoader
 import ru.polkatv.launcher.settings.Prefs
 import ru.polkatv.launcher.settings.SettingsRepository
 import ru.polkatv.launcher.settings.polkaDataStore
@@ -21,4 +23,6 @@ class AppContainer(val appContext: Context) {
     val wallpaperInterval: StateFlow<Int> =
         prefs.map { it.wallpaperIntervalMinutes }.stateIn(appScope, SharingStarted.Eagerly, 5)
     val wallpapers = WallpaperController(WallpaperLoader(appContext), wallpaperInterval, appScope)
+    val apps = AppsRepository(appContext, appScope)
+    val tileArt = TileArtLoader(appContext)
 }

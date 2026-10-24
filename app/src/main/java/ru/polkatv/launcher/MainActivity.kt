@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onStart() { super.onStart(); (application as PolkaApplication).container.wallpapers.start() }
-    override fun onStop() { (application as PolkaApplication).container.wallpapers.stop(); super.onStop() }
-    override fun onTrimMemory(level: Int) { super.onTrimMemory(level); (application as PolkaApplication).container.wallpapers.trimMemory() }
+    override fun onStart() { super.onStart(); (application as PolkaApplication).container.wallpapers.start(); (application as PolkaApplication).container.apps.start() }
+    override fun onStop() { (application as PolkaApplication).container.wallpapers.stop(); (application as PolkaApplication).container.apps.stop(); super.onStop() }
+    override fun onTrimMemory(level: Int) { super.onTrimMemory(level); (application as PolkaApplication).container.wallpapers.trimMemory(); (application as PolkaApplication).container.tileArt.trim() }
 }
