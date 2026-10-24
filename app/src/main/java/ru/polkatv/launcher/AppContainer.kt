@@ -20,6 +20,7 @@ import ru.polkatv.launcher.system.SystemActions
 import ru.polkatv.launcher.wallpaper.WallpaperController
 import ru.polkatv.launcher.wallpaper.WallpaperLoader
 import ru.polkatv.launcher.weather.OpenMeteoApi
+import ru.polkatv.launcher.weather.OwmApi
 import ru.polkatv.launcher.weather.WeatherCache
 import ru.polkatv.launcher.weather.WeatherRepository
 import java.io.File
@@ -38,5 +39,8 @@ class AppContainer(val appContext: Context) {
     val network = NetworkStatus(appContext)
     val inputs = InputsController(appContext, system)
     val httpClient = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).retryOnConnectionFailure(true).build()
-    val weather = WeatherRepository(OpenMeteoApi(httpClient), WeatherCache(File(appContext.filesDir, "weather")))
+    val weather = WeatherRepository(
+        OwmApi(httpClient, BuildConfig.OWM_API_KEY, geocoder = OpenMeteoApi(httpClient)),
+        WeatherCache(File(appContext.filesDir, "weather")),
+    )
 }

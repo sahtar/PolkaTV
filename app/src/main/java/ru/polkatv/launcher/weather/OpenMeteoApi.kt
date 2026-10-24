@@ -9,6 +9,10 @@ import okhttp3.Request
 import java.io.IOException
 import java.util.Locale
 
+/**
+ * Open-Meteo client. Its `forecast` endpoint (api.open-meteo.com) is unreachable from the target network,
+ * so only [search] (geocoding) is used; the forecast comes from [OwmApi].
+ */
 class OpenMeteoApi(
     private val client: OkHttpClient,
     private val forecastBase: String = "https://api.open-meteo.com",

@@ -37,6 +37,7 @@ import androidx.tv.material3.ListItem
 import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.ProvideTextStyle
 import androidx.tv.material3.Text
+import ru.polkatv.launcher.BuildConfig
 import ru.polkatv.launcher.R
 import ru.polkatv.launcher.ui.common.PolkaDialog
 import ru.polkatv.launcher.ui.theme.Dimens
@@ -85,7 +86,17 @@ fun WeatherShelf(
                 current == null -> Text(stringResource(R.string.wx_add_city_prompt), fontSize = 26.sp, color = TextSecondary, modifier = Modifier.align(Alignment.Center))
                 current.weather == null -> Column(Modifier.align(Alignment.CenterStart)) {
                     Text(current.city.displayName, fontSize = 30.sp, color = TextPrimary)
-                    Text(stringResource(if (current.error) R.string.wx_no_data else R.string.wx_unknown), fontSize = 20.sp, color = TextSecondary)
+                    Text(
+                        stringResource(
+                            when {
+                                BuildConfig.OWM_API_KEY.isBlank() -> R.string.wx_no_api_key
+                                current.error -> R.string.wx_no_data
+                                else -> R.string.wx_unknown
+                            },
+                        ),
+                        fontSize = 20.sp,
+                        color = TextSecondary,
+                    )
                 }
                 else -> WeatherContent(current)
             }

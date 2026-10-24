@@ -64,6 +64,7 @@
     <string name="ago_minutes">%1$d min</string>
     <string name="ago_hours">%1$d h</string>
     <string name="ago_days">%1$d d</string>
+    <string name="wx_no_api_key">OpenWeatherMap API key is not set</string>
     <string name="wx_no_data">No data, check the network</string>
     <string name="wx_add_city_prompt">Add a city to see the weather</string>
     <string name="city_menu_add">Add city</string>
@@ -73,7 +74,7 @@
     <string name="add_city_hint">City name</string>
     <string name="add_city_no_network">No connection</string>
     <string name="add_city_nothing">Nothing found</string>
-    <string name="wx_detail_hourly">Hourly forecast</string>
+    <string name="wx_detail_hourly">Forecast by hours</string>
     <string name="wx_detail_daily">7-day forecast</string>
     <string name="wx_sunrise">Sunrise %1$s</string>
     <string name="wx_sunset">Sunset %1$s</string>

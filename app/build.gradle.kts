@@ -12,6 +12,11 @@ val keystoreProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
 android {
     namespace = "ru.polkatv.launcher"
     compileSdk = 34
@@ -23,6 +28,7 @@ android {
         versionCode = 2
         versionName = "1.0.0"
         resourceConfigurations += listOf("ru", "en")
+        buildConfigField("String", "OWM_API_KEY", "\"${localProps.getProperty("owm.apiKey", "")}\"")
     }
 
     signingConfigs {

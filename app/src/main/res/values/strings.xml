@@ -64,6 +64,7 @@
     <string name="ago_minutes">%1$d мин</string>
     <string name="ago_hours">%1$d ч</string>
     <string name="ago_days">%1$d дн</string>
+    <string name="wx_no_api_key">Не задан ключ OpenWeatherMap</string>
     <string name="wx_no_data">Нет данных, проверьте сеть</string>
     <string name="wx_add_city_prompt">Добавьте город, чтобы видеть погоду</string>
     <string name="city_menu_add">Добавить город</string>
@@ -73,7 +74,7 @@
     <string name="add_city_hint">Название города</string>
     <string name="add_city_no_network">Нет связи</string>
     <string name="add_city_nothing">Ничего не найдено</string>
-    <string name="wx_detail_hourly">Почасовой прогноз</string>
+    <string name="wx_detail_hourly">Прогноз по часам</string>
     <string name="wx_detail_daily">На 7 дней</string>
     <string name="wx_sunrise">Восход %1$s</string>
     <string name="wx_sunset">Закат %1$s</string>
