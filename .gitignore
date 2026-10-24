@@ -1,0 +1,23 @@
+# Android / Gradle
+*.iml
+.gradle/
+/local.properties
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+# IDE
+.idea/
+*.hprof
+.DS_Store
+# Signing
+/keystore/
+*.jks
+*.keystore
+# Brainstorm companion
+.superpowers/
