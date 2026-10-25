@@ -9,6 +9,7 @@
 - Прогноз погоды берётся из OpenWeatherMap (Open-Meteo-хост прогноза недоступен из сети ТВ). Ключ: зарегистрируйтесь на openweathermap.org, создайте API-ключ (раздел «API keys»), добавьте строку `owm.apiKey=<ключ>` в `local.properties` (файл в `.gitignore`, в git не попадает) и пересоберите приложение. Без ключа на полке погоды будет надпись «Не задан ключ OpenWeatherMap».
 - Лимиты бесплатного тарифа OpenWeatherMap: 60 запросов в минуту; лаунчер делает 2 запроса на город раз в 30 минут. Поиск городов по-прежнему использует геокодинг Open-Meteo.
 - `tools/prepare_wallpapers.sh` — пересобрать обои из `design/wallpapers-src/`.
+- Адрес телевизора задаётся переменной `TV` (по умолчанию `192.168.100.2:5555`, по кабелю телевизор получил `192.168.100.16`): `TV=192.168.100.16:5555 tools/install_tv.sh`.
 - `tools/install_tv.sh` — собрать debug и установить; `tools/install_tv.sh --set-home` — ещё и сделать домашним экраном (см. «Домашний экран»).
 - `./gradlew assembleRelease` — релизная сборка (подписана тем же ключом, поэтому ставится поверх debug: `adb install -r app/build/outputs/apk/release/app-release.apk`).
 
@@ -22,10 +23,13 @@
 ```
 adb shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity
 adb shell pm disable-user --user 0 com.google.android.tvlauncher
+adb shell pm grant ru.polkatv.launcher android.permission.SYSTEM_ALERT_WINDOW
 adb shell appops set ru.polkatv.launcher SYSTEM_ALERT_WINDOW allow
 ```
 
-Откат одной командой: `tools/restore_googletv.sh` — включает Google TV обратно, снимает разрешение (`appops set … default`) и возвращает ему Home. Кнопка PatchWall на пульте не затрагивается. Фоновые фото: 12 кадров из заставки Xiaomi (дубликаты, кадры с водяными знаками и «розовые замки» убраны по решению владельца).
+Важно: одного `appops set` недостаточно — прошивка сбрасывает его при загрузке; именно `pm grant` делает разрешение постоянным (проверено перезагрузкой: в логе `BAL_ALLOW_SAW_PERMISSION`, «Полка» на экране через ~10 с после загрузки без нажатий).
+
+Откат одной командой: `tools/restore_googletv.sh` — включает Google TV обратно, снимает разрешение (`pm revoke` + `appops set … default`) и возвращает ему Home. Кнопка PatchWall на пульте не затрагивается. Фоновые фото: 12 кадров из заставки Xiaomi (дубликаты, кадры с водяными знаками и «розовые замки» убраны по решению владельца).
 ## Откат
 `tools/restore_googletv.sh` возвращает Google TV как домашний экран. «Полка» остаётся установленной; удалить: `adb shell pm uninstall ru.polkatv.launcher`.
 
