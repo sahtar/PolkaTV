@@ -2,7 +2,7 @@
 # Откат изменений на Xiaomi TV (MiTV-MOEU1, 192.168.100.2), сделанных 2026-10-24.
 # Запуск: bash xiaomi_tv_rollback.sh   (нужен adb и включённая отладка по сети на телевизоре)
 set -u
-TV="192.168.100.2:5555"
+TV="${TV:-192.168.100.16:5555}"
 adb connect "$TV" >/dev/null 2>&1
 D() { adb -s "$TV" shell "$@"; }
 
@@ -12,7 +12,7 @@ for p in com.miui.tv.analytics com.xiaomi.statistic com.xiaomi.mitv.tvmanager co
 done
 
 echo "== Снимаю ограничение фоновой работы с приложений =="
-for p in ru.mts.mtstv ru.kinopoisk.tv ru.ivi.client ru.start.androidmobile net.megogo.tv com.mobisystems.fileman; do
+for p in ru.mts.mtstv ru.kinopoisk.tv ru.ivi.client ru.start.androidmobile net.megogo.tv com.mobisystems.fileman ru.yandex.games com.vk.tv ru.rutube.app ru.more.play live.tvoe.app de.benzac.msx com.tcl.browser com.mxtech.videoplayer.ad com.nousguide.android.rbtv ru.rt.video.app.tv; do
   D cmd appops set --user 0 "$p" RUN_ANY_IN_BACKGROUND allow
   D cmd appops set --user 0 "$p" RUN_IN_BACKGROUND allow
   echo "$p: фон разрешён"

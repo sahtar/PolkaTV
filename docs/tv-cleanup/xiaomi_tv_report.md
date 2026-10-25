@@ -51,3 +51,12 @@ ru.mts.mtstv (KION), ru.kinopoisk.tv, ru.ivi.client, ru.start.androidmobile, net
 ## Откат
 `bash xiaomi_tv_rollback.sh` — включает пакеты обратно и снимает ограничения фона.
 Вручную: `adb shell pm enable --user 0 <пакет>` и `adb shell cmd appops set --user 0 <пакет> RUN_ANY_IN_BACKGROUND allow`.
+
+## Повторная проверка 2026-10-25 (вечер, аптайм 11 ч)
+
+- Load average ~22 на 4 ядрах — артефакт ядра MediaTek (потоки в состоянии D/RT: pqu_module, pre_signal_task), процессор при этом на 85–90% простаивал. Реальной нагрузки нет.
+- Память была под давлением: свободно 641 МБ, подкачка 525 из 614 МБ занята, у tvrecommendations десятки тысяч major faults.
+- **Ограничения фона, поставленные 2026-10-24, прошивка сбросила** (все шесть пакетов снова RUN_ANY_IN_BACKGROUND=allow), и кинотеатры снова стартовали при загрузке. Ограничения восстановлены и расширены на все пользовательские приложения «только для просмотра»: ru.yandex.games (его процесс AppMetrica висел в фоне на 39 МБ), com.vk.tv, ru.rutube.app, ru.more.play, live.tvoe.app, de.benzac.msx, com.tcl.browser, com.mxtech.videoplayer.ad, com.nousguide.android.rbtv, ru.rt.video.app.tv. После остановки фоновых процессов: свободно 944 МБ, подкачка 136 МБ свободно. Если ограничения снова сбросятся, причину надо искать в прошивке (возможно, при обновлении приложений через Play).
+- Домашний экран теперь «Полка» (Google TV launcher отключён), поэтому PatchWall (com.mitv.tvhome.atv) стал лишним: прошивка держит его резидентно (105–150 МБ, 28 мин CPU за 11 ч). Отключение — решение владельца (кнопка PatchWall на пульте перестанет работать).
+- Кандидаты на отключение по решению владельца: Mi Connect (com.xiaomi.mi_connect_service, 10 сервисов, ~25 МБ) — нужен только для связки с телефонами Xiaomi; Google Assistant (com.google.android.katniss, два процесса ~58 МБ) — нужен для голосового поиска с пульта.
+- Оставлены намеренно: gms, Play Store, tvrecommendations (панель уведомлений), mediashell (Chromecast), TTS (подгружается ассистентом).
