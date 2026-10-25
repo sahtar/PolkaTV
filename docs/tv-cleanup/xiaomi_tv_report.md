@@ -60,3 +60,5 @@ ru.mts.mtstv (KION), ru.kinopoisk.tv, ru.ivi.client, ru.start.androidmobile, net
 - Домашний экран теперь «Полка» (Google TV launcher отключён), поэтому PatchWall (com.mitv.tvhome.atv) стал лишним: прошивка держит его резидентно (105–150 МБ, 28 мин CPU за 11 ч). Отключение — решение владельца (кнопка PatchWall на пульте перестанет работать).
 - Кандидаты на отключение по решению владельца: Mi Connect (com.xiaomi.mi_connect_service, 10 сервисов, ~25 МБ) — нужен только для связки с телефонами Xiaomi; Google Assistant (com.google.android.katniss, два процесса ~58 МБ) — нужен для голосового поиска с пульта.
 - Оставлены намеренно: gms, Play Store, tvrecommendations (панель уведомлений), mediashell (Chromecast), TTS (подгружается ассистентом).
+
+- 2026-10-25 21:50: по решению владельца отключены PatchWall (com.mitv.tvhome.atv) и com.mitv.tvhome.michannel. Проверка перезагрузкой: «Полка» на экране сразу после загрузки, свободной памяти при старте 929 МБ (было ~810), прошивка стартует штатно; падение com.mediatek.tv.agent (SQLite, cus_color_temp_switch) наблюдалось и до изменений. Откат — в xiaomi_tv_rollback.sh.

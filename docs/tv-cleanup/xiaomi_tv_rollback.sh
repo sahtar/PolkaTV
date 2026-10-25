@@ -11,6 +11,9 @@ for p in com.miui.tv.analytics com.xiaomi.statistic com.xiaomi.mitv.tvmanager co
   printf "%-36s " "$p"; D pm enable --user 0 "$p" | tr -d '\r'
 done
 
+echo "== Включаю PatchWall обратно (отключён 2026-10-25) =="
+for p in com.mitv.tvhome.atv com.mitv.tvhome.michannel; do printf "%-36s " "$p"; D pm enable --user 0 "$p" | tr -d '\r'; done
+
 echo "== Снимаю ограничение фоновой работы с приложений =="
 for p in ru.mts.mtstv ru.kinopoisk.tv ru.ivi.client ru.start.androidmobile net.megogo.tv com.mobisystems.fileman ru.yandex.games com.vk.tv ru.rutube.app ru.more.play live.tvoe.app de.benzac.msx com.tcl.browser com.mxtech.videoplayer.ad com.nousguide.android.rbtv ru.rt.video.app.tv; do
   D cmd appops set --user 0 "$p" RUN_ANY_IN_BACKGROUND allow
