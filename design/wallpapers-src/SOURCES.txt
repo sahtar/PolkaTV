@@ -15,3 +15,4 @@ https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/cd41e55a7d18f516ee6895e84
 wp_19 removed 2026-10-24: byte-identical to wp_18 (23 unique photos)
 wp_20..wp_24 removed 2026-10-25: the five fallback photos bundled in the MiDream APK carry phone-camera watermarks (Redmi) — user asked to drop them.
 wp_08, wp_11, wp_12 removed 2026-10-25: near-duplicates of wp_01, wp_07, wp_05 (same picture re-encoded) — 15 unique photos remain.
+wp_05, wp_09, wp_14 removed 2026-10-25: pink castle/mansion renders — user asked to drop them (12 photos remain).

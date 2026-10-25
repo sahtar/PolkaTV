@@ -19,7 +19,7 @@ Spec: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`. Read it on
 - UI language: Russian strings in `values/strings.xml` (default), English in `values-en/strings.xml`. Never hard-code user-visible text in Kotlin.
 - All user-visible dimensions in dp/sp tuned for 1920×1080 at density 320 (1 dp = 2 px). Safe-zone padding 48 dp horizontally, 40 dp vertically.
 - No analytics, no crash reporting, no third-party services other than Open-Meteo.
-- Wallpapers: 15 originals in `design/wallpapers-src/` (4K; of the 24 screensaver files, wp_19 was a byte-identical duplicate, wp_08/11/12 near-duplicates and wp_20–24 carried camera watermarks — all removed 2026-10-25). The APK ships 1920×1080 JPEG copies in `app/src/main/assets/wallpapers/` with the same names, produced by `tools/prepare_wallpapers.sh`. Never load the 4K originals at runtime.
+- Wallpapers: 12 originals in `design/wallpapers-src/` (4K; of the 24 screensaver files, wp_19 was a byte-identical duplicate, wp_08/11/12 near-duplicates, wp_20–24 carried camera watermarks and wp_05/09/14 were pink-castle renders the user rejected — all removed 2026-10-25). The APK ships 1920×1080 JPEG copies in `app/src/main/assets/wallpapers/` with the same names, produced by `tools/prepare_wallpapers.sh`. Never load the 4K originals at runtime.
 - Both debug and release builds are signed with the same keystore `keystore/polkatv.jks` (git-ignored) so a release APK installs over a debug one without uninstalling.
 - Commit after every task with the message style `feat: …`, `test: …`, `chore: …`; end every commit message with `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
 - Work on branch `design/polkatv-spec` (the user chose it); do not touch `main`.
