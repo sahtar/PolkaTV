@@ -20,5 +20,7 @@ for p in ru.mts.mtstv ru.kinopoisk.tv ru.ivi.client ru.start.androidmobile net.m
   D cmd appops set --user 0 "$p" RUN_IN_BACKGROUND allow
   echo "$p: фон разрешён"
 done
+# AppOps пишет файл с задержкой; без принудительной записи перезагрузка теряет изменения.
+D cmd appops write-settings
 
 echo "== Итог =="; D pm list packages -d | tr -d '\r'
