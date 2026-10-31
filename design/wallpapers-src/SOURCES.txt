@@ -1,18 +1,16 @@
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/0451fbed2d7598811dc16150970d8275.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/1265c19e9a8c52e6bb95141942aa65f7.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/18448ee12e08b63446f2273888cdd572.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/4b11dabd77c1572caec52282ec262dcd.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/4e44583dff9c7c32b816c0fb39ea8c00.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/50e1a65cc786205d4fc6acc22a03d650.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/70e0476e3018da3a1ddf4527c2eebdfe.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/7bebb11ded4e6251de2b9e715daa7b0d.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/84d74bb50a4591c126a7afd2ed71be7f.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/a6d027e26b06f4b68ebaac035a4bc30b.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/b45ce8e3cdfa65ec23f1610d91e1447d.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/c410eb4126592609a2d59c33cee9373f.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/c80a10894a4e8f7051eb7ac7aae325c1.webp
-https://ru-fds-img.cdn.pandora.xiaomi.com/mitv/10007/0/cd41e55a7d18f516ee6895e848240250.webp
-wp_19 removed 2026-10-24: byte-identical to wp_18 (23 unique photos)
-wp_20..wp_24 removed 2026-10-25: the five fallback photos bundled in the MiDream APK carry phone-camera watermarks (Redmi) — user asked to drop them.
-wp_08, wp_11, wp_12 removed 2026-10-25: near-duplicates of wp_01, wp_07, wp_05 (same picture re-encoded) — 15 unique photos remain.
-wp_05, wp_09, wp_14 removed 2026-10-25: pink castle/mansion renders — user asked to drop them (12 photos remain).
+Обои «Мальдивы», заменили кадры заставки Xiaomi 2026-10-31 по решению владельца.
+Источник: Pexels (https://www.pexels.com/license/ — свободное использование, указание автора не требуется).
+Скачаны с CDN Pexels как центрированное кадрирование 16:9 3840×2160: <url>?w=3840&h=2160&fit=crop; в APK уходят копии 1920×1080 (tools/prepare_wallpapers.sh).
+
+wp_01.jpg  https://www.pexels.com/photo/2548565/
+wp_02.jpg  https://www.pexels.com/photo/9149277/
+wp_03.jpg  https://www.pexels.com/photo/29901905/
+wp_04.jpg  https://www.pexels.com/photo/8356055/
+wp_05.jpg  https://www.pexels.com/photo/9482126/
+wp_06.jpg  https://www.pexels.com/photo/3155696/
+wp_07.jpg  https://www.pexels.com/photo/1320686/
+wp_08.jpg  https://www.pexels.com/photo/3293187/
+wp_09.jpg  https://www.pexels.com/photo/3703521/
+wp_10.jpg  https://www.pexels.com/photo/31875072/
+wp_11.jpg  https://www.pexels.com/photo/6934/
+wp_12.jpg  https://www.pexels.com/photo/1456294/
