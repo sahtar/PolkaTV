@@ -50,6 +50,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val net by container.network.state.collectAsStateWithLifecycle()
     var inputs by remember { mutableStateOf<List<TvInput>?>(null) }
+    val hasInputs = remember { container.inputs.list().isNotEmpty() }
     fun orToast(ok: Boolean) { if (!ok) Toast.makeText(context, R.string.unavailable_on_tv, Toast.LENGTH_SHORT).show() }
     val headerActions = HeaderActions(
         onInputs = { inputs = container.inputs.list() },
@@ -78,6 +79,7 @@ fun HomeScreen(
                     net = net,
                     actions = headerActions,
                     iconsFocus = tiers.header,
+                    showInputs = hasInputs,
                 )
             }
             Spacer(Modifier.height(Dimens.tierGap))

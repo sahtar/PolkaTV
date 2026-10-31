@@ -21,14 +21,16 @@ object InputStateMapper {
 }
 
 class InputsController(private val context: Context, private val actions: SystemActions) {
-    private val tim = context.getSystemService(TvInputManager::class.java)
+    // Null on devices without the live_tv feature (set-top boxes); the inputs icon is hidden when the list is empty.
+    private val tim: TvInputManager? = context.getSystemService(TvInputManager::class.java)
 
     fun list(): List<TvInput> {
-        val infos: List<TvInputInfo> = runCatching { tim.tvInputList }.getOrDefault(emptyList())
+        val manager = tim ?: return emptyList()
+        val infos: List<TvInputInfo> = runCatching { manager.tvInputList }.getOrDefault(emptyList())
         return infos.filter { it.isPassthroughInput }
             .map { info ->
                 val label = info.loadLabel(context)?.toString()?.takeIf { it.isNotBlank() } ?: info.id.substringAfterLast('/')
-                TvInput(info.id, label, InputStateMapper.map(runCatching { tim.getInputState(info.id) }.getOrDefault(-1)))
+                TvInput(info.id, label, InputStateMapper.map(runCatching { manager.getInputState(info.id) }.getOrDefault(-1)))
             }
             .sortedBy { it.label }
     }

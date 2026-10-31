@@ -1,19 +1,30 @@
 #!/bin/bash
-# Build debug APK, install on the Xiaomi TV and (with --set-home) make it the HOME app.
+# Build the release APK, install it on a Xiaomi TV or box and (with --set-home) make Polka the HOME app.
+# Usage: TV=192.168.100.39:5555 tools/install_tv.sh [--set-home]
 set -euo pipefail
 cd "$(dirname "$0")/.."
-TV="${TV:-192.168.100.2:5555}"
+TV="${TV:-192.168.100.16:5555}"
 adb connect "$TV" >/dev/null
-./gradlew --no-daemon -q assembleDebug
-adb -s "$TV" install -r app/build/outputs/apk/debug/app-debug.apk
+S() { adb -s "$TV" shell "$@"; }
+./gradlew --no-daemon -q assembleRelease
+adb -s "$TV" install -r app/build/outputs/apk/release/app-release.apk
 if [ "${1:-}" = "--set-home" ]; then
-  adb -s "$TV" shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity
-  adb -s "$TV" shell pm disable-user --user 0 com.google.android.tvlauncher
-  # Overlay permission is never used for overlays: it exempts BootReceiver from the background-start block (see README).
-  # pm grant persists across reboots (the appop alone is reset at boot); appops set applies it immediately.
-  adb -s "$TV" shell pm grant ru.polkatv.launcher android.permission.SYSTEM_ALERT_WINDOW
-  adb -s "$TV" shell appops set ru.polkatv.launcher SYSTEM_ALERT_WINDOW allow
-  echo "Google TV launcher disabled; Home now opens Polka, also right after boot. Restore with tools/restore_googletv.sh"
+  sdk=$(S getprop ro.build.version.sdk | tr -d '\r')
+  S cmd package set-home-activity ru.polkatv.launcher/.MainActivity
+  home=$(S cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tr -d '\r' | tail -1)
+  if [ "$home" != "ru.polkatv.launcher/.MainActivity" ]; then
+    # Xiaomi TV firmware gives Google TV a higher HOME priority than any third-party app: the only way is to disable it (reversible).
+    S pm disable-user --user 0 com.google.android.tvlauncher
+    echo "Google TV launcher disabled (its HOME priority beats ours). Restore with tools/restore_googletv.sh"
+  else
+    echo "Google TV launcher left enabled: the preferred HOME activity is honoured on this device."
+  fi
+  if [ "$sdk" -ge 29 ]; then
+    # Android 10+ blocks activity starts from the background; the overlay permission exempts BootReceiver/WakeReceiver.
+    # It is never used for overlays (see README). pm grant persists across reboots; appops set applies it immediately.
+    S pm grant ru.polkatv.launcher android.permission.SYSTEM_ALERT_WINDOW
+    S appops set ru.polkatv.launcher SYSTEM_ALERT_WINDOW allow
+  fi
 fi
-adb -s "$TV" shell am start -n ru.polkatv.launcher/.MainActivity >/dev/null
-echo "Installed. HOME now: $(adb -s "$TV" shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tail -1)"
+S am start -n ru.polkatv.launcher/.MainActivity >/dev/null
+echo "Installed. HOME now: $(S cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tr -d '\r' | tail -1)"

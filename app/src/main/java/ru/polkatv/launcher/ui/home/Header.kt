@@ -54,7 +54,7 @@ data class HeaderActions(
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun Header(clockFormat: ClockFormat, showDate: Boolean, net: NetState, actions: HeaderActions, modifier: Modifier = Modifier, iconsFocus: FocusRequester = remember { FocusRequester() }) {
+fun Header(clockFormat: ClockFormat, showDate: Boolean, net: NetState, actions: HeaderActions, modifier: Modifier = Modifier, iconsFocus: FocusRequester = remember { FocusRequester() }, showInputs: Boolean = true) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
     val now by produceState(initialValue = LocalDateTime.now()) {
@@ -74,7 +74,8 @@ fun Header(clockFormat: ClockFormat, showDate: Boolean, net: NetState, actions: 
             if (showDate) Text(Formatters.date(now.toLocalDate(), locale), fontSize = Dimens.dateSize, color = TextSecondary)
         }
         Row(Modifier.focusRequester(iconsFocus).focusRestorer().focusGroup(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HeaderIcon(Icons.AutoMirrored.Filled.Input, stringResource(R.string.header_inputs), actions.onInputs)
+            // Set-top boxes have no HDMI inputs: the icon is hidden rather than opening an empty dialog.
+            if (showInputs) HeaderIcon(Icons.AutoMirrored.Filled.Input, stringResource(R.string.header_inputs), actions.onInputs)
             HeaderIcon(Icons.Default.Notifications, stringResource(R.string.header_notifications), actions.onNotifications)
             val netIcon: ImageVector = when (net) {
                 NetState.NONE -> Icons.Default.WifiOff

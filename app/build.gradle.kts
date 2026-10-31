@@ -23,10 +23,10 @@ android {
 
     defaultConfig {
         applicationId = "ru.polkatv.launcher"
-        minSdk = 30
+        minSdk = 28
         targetSdk = 34
-        versionCode = 7
-        versionName = "1.0.5"
+        versionCode = 8
+        versionName = "1.1.0"
         resourceConfigurations += listOf("ru", "en")
         buildConfigField("String", "OWM_API_KEY", "\"${localProps.getProperty("owm.apiKey", "").trim()}\"")
     }
