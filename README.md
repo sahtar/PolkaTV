@@ -1,11 +1,24 @@
 # PolkaTV («Полка»)
 
-Домашний экран для Xiaomi MiTV-MOEU1 (Android TV 14) в стиле Apple TV: часы, погода для нескольких городов (OpenWeatherMap; поиск городов через геокодинг Open-Meteo), 4–6 плиток приложений, служебные иконки, фото из заставки Xiaomi фоном.
+Домашний экран в духе Apple TV для Android TV: часы, погода для нескольких городов (OpenWeatherMap; поиск городов через геокодинг Open-Meteo), 4–6 плиток приложений по вашему выбору, служебные иконки (входы, уведомления, сеть, настройки) и фото-фон (12 видов Мальдив). Проверено на Xiaomi MiTV-MOEU1 (Android TV 14) и приставке Xiaomi Mi Box 3 (Android TV 9); минимальная версия — Android 9.
 
-Спецификация: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`. План: `docs/superpowers/plans/2026-10-24-polkatv-launcher.md`.
+![Полка на Mi Box 3](docs/screenshots/home.jpg)
+
+Проект целиком сделан в диалоге с Claude Code — от поиска телевизора в сети до установки и проверки на устройстве. **Как повторить это на своём телевизоре: [docs/HOWTO-with-claude.md](docs/HOWTO-with-claude.md).** Спецификация: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`, план: `docs/superpowers/plans/2026-10-24-polkatv-launcher.md`. Лицензия — MIT.
 
 ## Сборка и установка
-- Требования: JDK 21, Android SDK (platform 34, build-tools 34.0.0), `keystore/keystore.properties` + `keystore/polkatv.jks` (не в git), `local.properties` с `sdk.dir`.
+- Требования: JDK 17+ (проверено на 21), Android SDK (platform 34, build-tools 34.0.0), `local.properties` с `sdk.dir`, свой ключ подписи в `keystore/` (не в git, см. ниже).
+- Ключ подписи (один раз; debug и release подписываются им же, поэтому сборки взаимозаменяемы при установке поверх):
+  ```bash
+  mkdir -p keystore && keytool -genkeypair -v -keystore keystore/polkatv.jks -alias polka -keyalg RSA -keysize 2048 -validity 10000
+  ```
+  и файл `keystore/keystore.properties`:
+  ```
+  storeFile=polkatv.jks
+  storePassword=<пароль хранилища>
+  keyAlias=polka
+  keyPassword=<пароль ключа>
+  ```
 - Прогноз погоды берётся из OpenWeatherMap (Open-Meteo-хост прогноза недоступен из сети ТВ). Ключ: зарегистрируйтесь на openweathermap.org, создайте API-ключ (раздел «API keys»), добавьте строку `owm.apiKey=<ключ>` в `local.properties` (файл в `.gitignore`, в git не попадает) и пересоберите приложение. Без ключа на полке погоды будет надпись «Не задан ключ OpenWeatherMap».
 - Лимиты бесплатного тарифа OpenWeatherMap: 60 запросов в минуту; лаунчер делает 2 запроса на город раз в 30 минут. Поиск городов по-прежнему использует геокодинг Open-Meteo.
 - `tools/prepare_wallpapers.sh` — пересобрать обои из `design/wallpapers-src/`.
