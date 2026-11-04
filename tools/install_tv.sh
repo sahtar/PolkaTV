@@ -1,9 +1,9 @@
 #!/bin/bash
 # Build the release APK, install it on a Xiaomi TV or box and (with --set-home) make Polka the HOME app.
-# Usage: TV=192.168.100.39:5555 tools/install_tv.sh [--set-home]
+# Usage: TV=<ip>:5555 tools/install_tv.sh [--set-home]
 set -euo pipefail
 cd "$(dirname "$0")/.."
-TV="${TV:-192.168.100.16:5555}"
+TV="${TV:?Укажите адрес устройства: TV=<ip>:5555}"
 adb connect "$TV" >/dev/null
 S() { adb -s "$TV" shell "$@"; }
 ./gradlew --no-daemon -q assembleRelease

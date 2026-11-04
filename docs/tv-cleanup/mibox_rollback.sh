@@ -1,7 +1,7 @@
 #!/bin/bash
 # Откат чистки приставки Xiaomi Mi Box 3 (mibox_cleanup.sh). Запуск: bash mibox_rollback.sh
 set -u
-TV="${TV:-192.168.100.39:5555}"
+TV="${TV:?Укажите адрес устройства: TV=<ip>:5555}"
 adb connect "$TV" >/dev/null 2>&1
 D() { adb -s "$TV" shell "$@"; }
 

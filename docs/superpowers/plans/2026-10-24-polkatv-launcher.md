@@ -12,7 +12,7 @@ Spec: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`. Read it on
 
 ## Global Constraints
 
-- Target device only: Xiaomi MiTV-MOEU1, Android 14 (API 34), armeabi-v7a, UI rendered at 1920×1080, density 320, locale ru-RU, D-pad only (no touch). ADB over network at `192.168.100.2:5555`.
+- Target device only: Xiaomi MiTV-MOEU1, Android 14 (API 34), armeabi-v7a, UI rendered at 1920×1080, density 320, locale ru-RU, D-pad only (no touch). ADB over network at `<ip>:5555`.
 - Package / applicationId: `ru.polkatv.launcher`. App label: «Полка» (ru), "Polka" (en).
 - compileSdk 34, minSdk 30, targetSdk 34. Do not add libraries that require compileSdk 35 (e.g. `androidx.core:core` 1.15+). Pin `androidx.core:core-ktx:1.13.1`.
 - Build toolchain: `./gradlew` wrapper pinned to Gradle 8.9; JDK is the JetBrains Runtime 21 at `/Users/konstantinsakhtaridis/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home`; SDK at `/Users/konstantinsakhtaridis/Library/Android/sdk` (platform android-34, build-tools 34.0.0 are installed; nothing else must be downloaded from the SDK).
@@ -23,7 +23,7 @@ Spec: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`. Read it on
 - Both debug and release builds are signed with the same keystore `keystore/polkatv.jks` (git-ignored) so a release APK installs over a debug one without uninstalling.
 - Commit after every task with the message style `feat: …`, `test: …`, `chore: …`; end every commit message with `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
 - Work on branch `design/polkatv-spec` (the user chose it); do not touch `main`.
-- Device verification commands (used throughout): `adb connect 192.168.100.2:5555`, `adb -s 192.168.100.2:5555 install -r <apk>`, `adb -s 192.168.100.2:5555 shell am start -n ru.polkatv.launcher/.MainActivity`, `adb -s 192.168.100.2:5555 exec-out screencap -p > /tmp/polka.png`, `adb -s 192.168.100.2:5555 shell input keyevent <KEYCODE>` (DPAD_UP=19, DPAD_DOWN=20, DPAD_LEFT=21, DPAD_RIGHT=22, DPAD_CENTER=23, BACK=4, HOME=3, MENU=82). A long press is `input keyevent --longpress 23`.
+- Device verification commands (used throughout): `adb connect <ip>:5555`, `adb -s <ip>:5555 install -r <apk>`, `adb -s <ip>:5555 shell am start -n ru.polkatv.launcher/.MainActivity`, `adb -s <ip>:5555 exec-out screencap -p > /tmp/polka.png`, `adb -s <ip>:5555 shell input keyevent <KEYCODE>` (DPAD_UP=19, DPAD_DOWN=20, DPAD_LEFT=21, DPAD_RIGHT=22, DPAD_CENTER=23, BACK=4, HOME=3, MENU=82). A long press is `input keyevent --longpress 23`.
 
 ---
 
@@ -580,7 +580,7 @@ Expected: `BUILD SUCCESSFUL`, APK exists (~8–12 MB with icons-extended in debu
 - [ ] **Step 11: Install on the TV, launch from the Leanback entry, screenshot**
 
 ```bash
-TV=192.168.100.2:5555; adb connect $TV
+TV=<ip>:5555; adb connect $TV
 adb -s $TV install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s $TV shell am start -n ru.polkatv.launcher/.MainActivity
 sleep 3; adb -s $TV exec-out screencap -p > /tmp/polka_task1.png
@@ -596,7 +596,7 @@ Expected: `Success` on install; topResumedActivity is `ru.polkatv.launcher/.Main
 # Build debug APK, install on the Xiaomi TV and (with --set-home) make it the HOME app.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-TV="${TV:-192.168.100.2:5555}"
+TV="${TV:-<ip>:5555}"
 adb connect "$TV" >/dev/null
 ./gradlew --no-daemon -q assembleDebug
 adb -s "$TV" install -r app/build/outputs/apk/debug/app-debug.apk
@@ -611,7 +611,7 @@ echo "Installed. HOME now: $(adb -s "$TV" shell cmd package resolve-activity --b
 #!/bin/bash
 # Make Google TV the HOME app again (Polka stays installed).
 set -euo pipefail
-TV="${TV:-192.168.100.2:5555}"
+TV="${TV:-<ip>:5555}"
 adb connect "$TV" >/dev/null
 adb -s "$TV" shell cmd package set-home-activity com.google.android.tvlauncher/.MainActivity
 adb -s "$TV" shell input keyevent 3
@@ -915,9 +915,9 @@ Imports needed: `androidx.lifecycle.compose.collectAsStateWithLifecycle`, `andro
 
 ```bash
 tools/install_tv.sh
-sleep 5; adb -s 192.168.100.2:5555 exec-out screencap -p > /tmp/polka_wp1.png
-sleep 70; adb -s 192.168.100.2:5555 exec-out screencap -p > /tmp/polka_wp2.png
-adb -s 192.168.100.2:5555 shell dumpsys meminfo ru.polkatv.launcher | grep -E "TOTAL PSS|Graphics"
+sleep 5; adb -s <ip>:5555 exec-out screencap -p > /tmp/polka_wp1.png
+sleep 70; adb -s <ip>:5555 exec-out screencap -p > /tmp/polka_wp2.png
+adb -s <ip>:5555 shell dumpsys meminfo ru.polkatv.launcher | grep -E "TOTAL PSS|Graphics"
 ```
 Expected: two screenshots show different photos with a darkened gradient and the white «Полка»; TOTAL PSS under ~120 MB. Open both PNGs with the Read tool to confirm visually.
 
@@ -1187,7 +1187,7 @@ val wallpaperInterval: StateFlow<Int> = prefs.map { it.wallpaperIntervalMinutes 
 
 ```bash
 ./gradlew --no-daemon testDebugUnitTest && tools/install_tv.sh
-adb -s 192.168.100.2:5555 shell run-as ru.polkatv.launcher ls files/datastore 2>/dev/null || echo "(datastore file appears after first write — fine)"
+adb -s <ip>:5555 shell run-as ru.polkatv.launcher ls files/datastore 2>/dev/null || echo "(datastore file appears after first write — fine)"
 ```
 Expected: build green, app still shows wallpapers (interval now 5 min from defaults).
 
@@ -1425,7 +1425,7 @@ Expected: 2 tests pass. If `ComponentName.equals` stub breaks equality, apply th
 
 Temporarily add to `MainActivity.onStart`, after `start()`: `lifecycleScope.launch { container.apps.apps.collect { android.util.Log.i("Polka", "apps=" + it.size + " " + it.take(8).map { a -> a.label }) } }` (import `androidx.lifecycle.lifecycleScope`, `kotlinx.coroutines.launch`). Then:
 ```bash
-tools/install_tv.sh; sleep 3; adb -s 192.168.100.2:5555 logcat -d -s Polka | tail -3
+tools/install_tv.sh; sleep 3; adb -s <ip>:5555 logcat -d -s Polka | tail -3
 ```
 Expected: `apps=~30` with labels like `Google Play Игры` absent (disabled) and `YouTube`, `Кинопоиск`, `Иви` present. Remove the temporary log before committing.
 
@@ -2104,7 +2104,7 @@ fun PolkaApp(container: AppContainer) {
 
 ```bash
 ./gradlew --no-daemon testDebugUnitTest && tools/install_tv.sh
-TV=192.168.100.2:5555
+TV=<ip>:5555
 sleep 4; adb -s $TV exec-out screencap -p > /tmp/polka_home1.png
 adb -s $TV shell input keyevent 22; adb -s $TV shell input keyevent 22   # right x2
 adb -s $TV exec-out screencap -p > /tmp/polka_home2.png
@@ -2376,7 +2376,7 @@ In `PolkaApp.kt` add the route:
 
 ```bash
 ./gradlew --no-daemon testDebugUnitTest && tools/install_tv.sh
-TV=192.168.100.2:5555; sleep 4
+TV=<ip>:5555; sleep 4
 for i in 1 2 3 4 5; do adb -s $TV shell input keyevent 22; done   # move to the «Все приложения» tile (6th)
 adb -s $TV shell input keyevent 23; sleep 2; adb -s $TV exec-out screencap -p > /tmp/polka_allapps.png
 adb -s $TV shell input keyevent --longpress 23; sleep 1; adb -s $TV exec-out screencap -p > /tmp/polka_allapps_menu.png
@@ -3825,7 +3825,7 @@ In `PolkaApp`: pass `onOpenWeather = { nav.navigate(Routes.weather(it)) }` and a
 
 ```bash
 ./gradlew --no-daemon testDebugUnitTest && tools/install_tv.sh
-TV=192.168.100.2:5555; sleep 4
+TV=<ip>:5555; sleep 4
 adb -s $TV shell input keyevent 19                      # up → shelf (shows «Добавьте город…»)
 adb -s $TV shell input keyevent 23; sleep 1             # OK → add-city dialog
 adb -s $TV shell input text "Moskva"; sleep 3; adb -s $TV exec-out screencap -p > /tmp/polka_addcity.png
@@ -4070,7 +4070,7 @@ In `PolkaApp` update the call: `HomeScreen(vm, container, onOpenAllApps = { nav.
 
 ```bash
 ./gradlew --no-daemon testDebugUnitTest && tools/install_tv.sh
-TV=192.168.100.2:5555; sleep 4
+TV=<ip>:5555; sleep 4
 adb -s $TV shell input keyevent 19; adb -s $TV shell input keyevent 19     # to header icons (first = Inputs)
 adb -s $TV shell input keyevent 23; sleep 1; adb -s $TV exec-out screencap -p > /tmp/polka_inputs.png
 adb -s $TV shell input keyevent 23; sleep 4                                # pick first input (HDMI 1)
@@ -4366,7 +4366,7 @@ In `PolkaApp`, replace the placeholder settings route with:
 
 ```bash
 ./gradlew --no-daemon testDebugUnitTest && tools/install_tv.sh
-TV=192.168.100.2:5555; sleep 4
+TV=<ip>:5555; sleep 4
 adb -s $TV shell input keyevent 19; adb -s $TV shell input keyevent 19; for i in 1 2 3 4; do adb -s $TV shell input keyevent 22; done; adb -s $TV shell input keyevent 23; sleep 2
 adb -s $TV exec-out screencap -p > /tmp/polka_settings.png
 adb -s $TV shell input keyevent 20; adb -s $TV shell input keyevent 20; adb -s $TV shell input keyevent 23; sleep 1   # Фон section
@@ -4399,7 +4399,7 @@ Implements spec §6.1, §9 (device checks 7–9), §10, §12 risk 2. Deliverable
 
 ```bash
 tools/install_tv.sh --set-home
-TV=192.168.100.2:5555
+TV=<ip>:5555
 adb -s $TV shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tail -1
 adb -s $TV shell am start -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity; sleep 4
 adb -s $TV shell input keyevent 3; sleep 2

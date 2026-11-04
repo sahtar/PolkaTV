@@ -1,7 +1,7 @@
 #!/bin/bash
 # Make Google TV the HOME app again (Polka stays installed). Usage: TV=<ip:port> tools/restore_googletv.sh
 set -euo pipefail
-TV="${TV:-192.168.100.16:5555}"
+TV="${TV:?Укажите адрес устройства: TV=<ip>:5555}"
 adb connect "$TV" >/dev/null
 S() { adb -s "$TV" shell "$@"; }
 S pm enable --user 0 com.google.android.tvlauncher

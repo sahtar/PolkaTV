@@ -3,7 +3,7 @@
 # Запуск: bash xiaomi_tv_restrict_background.sh   (нужен adb и отладка по сети на телевизоре)
 # Откат: xiaomi_tv_rollback.sh
 set -u
-TV="${TV:-192.168.100.16:5555}"
+TV="${TV:?Укажите адрес устройства: TV=<ip>:5555}"
 adb connect "$TV" >/dev/null 2>&1
 D() { adb -s "$TV" shell "$@"; }
 

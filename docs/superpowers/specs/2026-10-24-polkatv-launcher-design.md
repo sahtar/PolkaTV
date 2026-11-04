@@ -18,7 +18,7 @@
 | Экран | Панель 4K, интерфейс Android рендерится в 1920×1080, density 320 |
 | Локаль | ru-RU, 24-часовой формат по системе |
 | Ввод | Только пульт (D-pad, OK, Back, Home, Menu). Сенсорного экрана нет |
-| Доступ | ADB по сети 192.168.100.2:5555 (включён пользователем) |
+| Доступ | ADB по сети <ip>:5555 (включён пользователем) |
 | Текущий Home | com.google.android.tvlauncher/.MainActivity; PatchWall (com.mitv.tvhome.atv) установлен, вызывается своей кнопкой пульта |
 | Сборка | macOS, Android Studio + SDK в ~/Library/Android/sdk, JDK 21 (JetBrains Runtime), Gradle wrapper |
 
@@ -217,7 +217,7 @@ ru.polkatv.launcher
 
 - `./gradlew assembleDebug` для итераций; `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 - Финальная установка: `assembleRelease` с ключом из `keystore/polkatv.jks` (создаётся при первой сборке, в git не попадает, пароль в `keystore/README` только локально).
-- `tools/install_tv.sh`: подключение к 192.168.100.2:5555, установка, назначение домашним экраном. `tools/restore_googletv.sh`: откат.
+- `tools/install_tv.sh`: подключение к <ip>:5555, установка, назначение домашним экраном. `tools/restore_googletv.sh`: откат.
 
 ## 11. Вне охвата
 

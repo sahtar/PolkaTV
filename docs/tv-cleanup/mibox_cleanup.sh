@@ -3,7 +3,7 @@
 # телеметрия, Play Games, PatchWall, Google Assistant, Mi Link отключаются; «только для просмотра» приложениям запрещается фон.
 # Запуск: bash mibox_cleanup.sh      Откат: bash mibox_rollback.sh
 set -u
-TV="${TV:-192.168.100.39:5555}"
+TV="${TV:?Укажите адрес устройства: TV=<ip>:5555}"
 adb connect "$TV" >/dev/null 2>&1
 D() { adb -s "$TV" shell "$@"; }
 
