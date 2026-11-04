@@ -4,6 +4,8 @@
 
 ![Полка на Mi Box 3](docs/screenshots/home.jpg)
 
+**English in brief.** PolkaTV is an Apple TV-style home screen (launcher) for Android TV 9+: a big clock, weather for several cities (OpenWeatherMap), 4–6 app tiles you pick yourself, the system shortcuts (inputs, notifications, network, settings) and a rotating photo background (12 Maldives photos from Pexels). Kotlin + Jetpack Compose for TV, no ads, no analytics, no accounts. Verified on a Xiaomi MiTV (Android 14) and a Mi Box 3 (Android 9). Build with your own OpenWeatherMap key (`local.properties`), install with `TV=<ip>:5555 tools/install_tv.sh --set-home`; Xiaomi firmware quirks (HOME priority, boot/standby handling) are documented in this README. The whole project was built in a conversation with Claude Code; [docs/HOWTO-with-claude.md](docs/HOWTO-with-claude.md) explains how to repeat it on your TV (in Russian).
+
 Проект целиком сделан в диалоге с Claude Code — от поиска телевизора в сети до установки и проверки на устройстве. **Как повторить это на своём телевизоре: [docs/HOWTO-with-claude.md](docs/HOWTO-with-claude.md).** Спецификация: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`, план: `docs/superpowers/plans/2026-10-24-polkatv-launcher.md`. Лицензия — MIT.
 
 ## Сборка и установка
