@@ -4,9 +4,18 @@
 
 ![Полка на Mi Box 3](docs/screenshots/home.jpg)
 
-**English in brief.** PolkaTV is an Apple TV-style home screen (launcher) for Android TV 9+: a big clock, weather for several cities (OpenWeatherMap), 4–6 app tiles you pick yourself, the system shortcuts (inputs, notifications, network, settings) and a rotating photo background (12 Maldives photos from Pexels). Kotlin + Jetpack Compose for TV, no ads, no analytics, no accounts. Verified on a Xiaomi MiTV (Android 14) and a Mi Box 3 (Android 9). Build with your own OpenWeatherMap key (`local.properties`), install with `TV=<ip>:5555 tools/install_tv.sh --set-home`; Xiaomi firmware quirks (HOME priority, boot/standby handling) are documented in this README. The whole project was built in a conversation with Claude Code; [docs/HOWTO-with-claude.md](docs/HOWTO-with-claude.md) explains how to repeat it on your TV (in Russian).
+**English in brief.** PolkaTV is an Apple TV-style home screen (launcher) for Android TV 9+: a big clock, weather for several cities (OpenWeatherMap), 4–6 app tiles you pick yourself, the system shortcuts (inputs, notifications, network, settings) and a rotating photo background (12 Maldives photos from Pexels). Kotlin + Jetpack Compose for TV, no ads, no analytics, no accounts. Verified on a Xiaomi MiTV (Android 14) and a Mi Box 3 (Android 9). Grab the APK from [Releases](https://github.com/sahtar/PolkaTV/releases), `adb install -r` it, enter your free OpenWeatherMap key in Settings → Cities (or `adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key KEY`) and make it the home app (`cmd package set-home-activity ru.polkatv.launcher/.MainActivity`; on Xiaomi firmware the Google TV launcher must be disabled, see below). Or build from source with `TV=<ip>:5555 tools/install_tv.sh --set-home`; Xiaomi firmware quirks (HOME priority, boot/standby handling) are documented in this README. The whole project was built in a conversation with Claude Code; [docs/HOWTO-with-claude.md](docs/HOWTO-with-claude.md) explains how to repeat it on your TV (in Russian).
 
 Проект целиком сделан в диалоге с Claude Code — от поиска телевизора в сети до установки и проверки на устройстве. **Как повторить это на своём телевизоре: [docs/HOWTO-with-claude.md](docs/HOWTO-with-claude.md).** Спецификация: `docs/superpowers/specs/2026-10-24-polkatv-launcher-design.md`, план: `docs/superpowers/plans/2026-10-24-polkatv-launcher.md`. Лицензия — MIT.
+
+## Установка из релиза (без сборки)
+
+1. Скачайте `PolkaTV-<версия>.apk` со страницы [Releases](https://github.com/sahtar/PolkaTV/releases) и установите: `adb connect <ip>:5555 && adb install -r PolkaTV-<версия>.apk`. Если раньше ставили свою сборку, её нужно удалить (`adb shell pm uninstall ru.polkatv.launcher`): подписи разные.
+2. Ключ погоды: бесплатный ключ на openweathermap.org (My API keys). Введите его в «Полке»: Настройки → Города → Ключ OpenWeatherMap, или без набора пультом:
+   ```bash
+   adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key ВАШ_КЛЮЧ
+   ```
+3. Сделать домашним экраном: `adb shell cmd package set-home-activity ru.polkatv.launcher/.MainActivity`. На прошивках Xiaomi этого мало, см. «Домашний экран»: лаунчер Google TV придётся отключить (`pm disable-user --user 0 com.google.android.tvlauncher`, обратимо), а на Android 10+ ещё выдать разрешение `pm grant ru.polkatv.launcher android.permission.SYSTEM_ALERT_WINDOW` для запуска после загрузки.
 
 ## Сборка и установка
 - Требования: JDK 17+ (проверено на 21), Android SDK (platform 34, build-tools 34.0.0), `local.properties` с `sdk.dir`, свой ключ подписи в `keystore/` (не в git, см. ниже).
@@ -21,7 +30,7 @@
   keyAlias=polka
   keyPassword=<пароль ключа>
   ```
-- Прогноз погоды берётся из OpenWeatherMap (Open-Meteo-хост прогноза недоступен из сети ТВ). Ключ: зарегистрируйтесь на openweathermap.org, создайте API-ключ (раздел «API keys»), добавьте строку `owm.apiKey=<ключ>` в `local.properties` (файл в `.gitignore`, в git не попадает) и пересоберите приложение. Без ключа на полке погоды будет надпись «Не задан ключ OpenWeatherMap».
+- Прогноз погоды берётся из OpenWeatherMap (Open-Meteo-хост прогноза недоступен из сети ТВ). Ключ задаётся на устройстве (Настройки → Города → Ключ OpenWeatherMap, или adb-командой из раздела выше) и хранится в настройках «Полки». Для собственной сборки ключ можно и вшить: строка `owm.apiKey=<ключ>` в `local.properties` (файл в `.gitignore`); ключ из настроек имеет приоритет. Публичный релиз собирается без вшитого ключа: `./gradlew -PowmApiKey= assembleRelease`. Без ключа на полке погоды будет надпись «Не задан ключ OpenWeatherMap».
 - Лимиты бесплатного тарифа OpenWeatherMap: 60 запросов в минуту; лаунчер делает 2 запроса на город раз в 30 минут. Поиск городов по-прежнему использует геокодинг Open-Meteo.
 - `tools/prepare_wallpapers.sh` — пересобрать обои из `design/wallpapers-src/`.
 - Адрес устройства (IP в локальной сети и порт 5555) передаётся переменной `TV`, без неё скрипты не запускаются: `TV=<ip>:5555 tools/install_tv.sh`.

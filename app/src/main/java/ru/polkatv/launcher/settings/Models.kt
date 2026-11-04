@@ -39,4 +39,6 @@ data class Prefs(
     val dimLevel: DimLevel = DimLevel.MEDIUM,
     val showDate: Boolean = true,
     val clockFormat: ClockFormat = ClockFormat.SYSTEM,
+    /** OpenWeatherMap key entered on the device (settings or the adb intent extra); blank = use the build-time key, if any. */
+    val owmApiKey: String = "",
 )

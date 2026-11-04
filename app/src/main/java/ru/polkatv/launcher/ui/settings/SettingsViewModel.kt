@@ -49,4 +49,6 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     fun setShowDate(b: Boolean) = edit { it.copy(showDate = b) }
 
     suspend fun searchCities(q: String): List<City> = container.weather.search(q)
+
+    fun setOwmApiKey(key: String) = container.setOwmApiKey(key)
 }

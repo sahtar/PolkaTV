@@ -15,28 +15,33 @@ import java.util.Locale
  */
 class OwmApi(
     private val client: OkHttpClient,
-    private val apiKey: String,
+    /** Read on every request, so a key saved in settings takes effect without restarting the app. */
+    private val apiKey: () -> String,
     private val geocoder: WeatherApi,
     private val base: String = "https://api.openweathermap.org",
 ) : WeatherApi {
+    constructor(client: OkHttpClient, apiKey: String, geocoder: WeatherApi, base: String = "https://api.openweathermap.org") :
+        this(client, { apiKey }, geocoder, base)
+
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun forecast(lat: Double, lon: Double): ForecastResponse {
-        if (apiKey.isBlank()) throw IOException("OpenWeatherMap API key is not configured (owm.apiKey in local.properties)")
-        val current = json.decodeFromString<OwmCurrentDto>(get(url("/data/2.5/weather", lat, lon)))
-        val forecast = json.decodeFromString<OwmForecastDto>(get(url("/data/2.5/forecast", lat, lon)))
+        val key = apiKey().trim()
+        if (key.isBlank()) throw IOException("OpenWeatherMap API key is not set (Polka settings → Cities)")
+        val current = json.decodeFromString<OwmCurrentDto>(get(url("/data/2.5/weather", lat, lon, key)))
+        val forecast = json.decodeFromString<OwmForecastDto>(get(url("/data/2.5/forecast", lat, lon, key)))
         return OwmAdapter.toForecastResponse(current, forecast)
     }
 
     override suspend fun search(query: String): List<GeoResultDto> = geocoder.search(query)
 
-    private fun url(path: String, lat: Double, lon: Double): String =
+    private fun url(path: String, lat: Double, lon: Double, key: String): String =
         "$base$path".toHttpUrl().newBuilder()
             .addQueryParameter("lat", String.format(Locale.US, "%.4f", lat))
             .addQueryParameter("lon", String.format(Locale.US, "%.4f", lon))
             .addQueryParameter("units", "metric")
             .addQueryParameter("lang", "ru")
-            .addQueryParameter("appid", apiKey)
+            .addQueryParameter("appid", key)
             .build().toString()
 
     private suspend fun get(url: String): String = withContext(Dispatchers.IO) {

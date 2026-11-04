@@ -64,7 +64,7 @@
     <string name="ago_minutes">%1$d мин</string>
     <string name="ago_hours">%1$d ч</string>
     <string name="ago_days">%1$d дн</string>
-    <string name="wx_no_api_key">Не задан ключ OpenWeatherMap</string>
+    <string name="wx_no_api_key">Не задан ключ OpenWeatherMap: Настройки → Города</string>
     <string name="wx_no_data">Нет данных, проверьте сеть</string>
     <string name="wx_add_city_prompt">Добавьте город, чтобы видеть погоду</string>
     <string name="city_menu_add">Добавить город</string>
@@ -97,6 +97,15 @@
     <string name="settings_city_up">Выше</string>
     <string name="settings_city_down">Ниже</string>
     <string name="settings_city_remove">Удалить</string>
+    <string name="settings_api_key">Ключ OpenWeatherMap</string>
+    <string name="settings_api_key_set">Задан</string>
+    <string name="settings_api_key_missing">Не задан — без него погода не работает</string>
+    <string name="api_key_title">Ключ OpenWeatherMap</string>
+    <string name="api_key_hint">Вставьте ключ</string>
+    <string name="api_key_help">Бесплатный ключ: openweathermap.org → My API keys. Чтобы не набирать его пультом: adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key КЛЮЧ</string>
+    <string name="api_key_saved">Ключ OpenWeatherMap сохранён</string>
+    <string name="action_save">Сохранить</string>
+    <string name="action_clear">Очистить</string>
     <string name="settings_interval">Смена фона</string>
     <string name="settings_interval_off">Выключена</string>
     <string name="settings_interval_min">Каждые %1$d мин</string>

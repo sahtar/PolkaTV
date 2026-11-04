@@ -13,6 +13,7 @@ class PrefsCodecTest {
             dimLevel = DimLevel.LIGHT,
             showDate = false,
             clockFormat = ClockFormat.H12,
+            owmApiKey = "0123456789abcdef0123456789abcdef",
         )
         assertEquals(p, PrefsCodec.decode(PrefsCodec.encode(p)))
     }
@@ -26,6 +27,7 @@ class PrefsCodecTest {
         val decoded = PrefsCodec.decode("""{"tiles":["x","y","z","w"],"futureField":1}""")
         assertEquals(listOf("x", "y", "z", "w"), decoded.tiles)
         assertEquals(5, decoded.wallpaperIntervalMinutes)
+        assertEquals("", decoded.owmApiKey)
     }
 
     @Test fun `city key is stable and display name adds region when different`() {

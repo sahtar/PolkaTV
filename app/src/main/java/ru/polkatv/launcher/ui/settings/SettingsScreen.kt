@@ -55,6 +55,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
     var pickFor by remember { mutableStateOf<Int?>(null) }
     var addCity by remember { mutableStateOf(false) }
     var cityMenu by remember { mutableStateOf<Int?>(null) }
+    var apiKeyDialog by remember { mutableStateOf(false) }
 
     Row(Modifier.fillMaxSize().background(Color(0xFF0B1020)).padding(horizontal = Dimens.safeH, vertical = Dimens.safeV)) {
         Column(Modifier.width(360.dp).fillMaxHeight()) {
@@ -88,6 +89,10 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
                         ListItem(selected = false, onClick = { cityMenu = i }, headlineContent = { Text(c.displayName) }, supportingContent = { Text(c.country ?: "") })
                     }
                     if (prefs.cities.size < 6) ListItem(selected = false, onClick = { addCity = true }, headlineContent = { Text(stringResource(R.string.settings_city_add)) })
+                    Spacer(Modifier.height(16.dp))
+                    val keySet = prefs.owmApiKey.isNotBlank() || BuildConfig.OWM_API_KEY.isNotBlank()
+                    ListItem(selected = false, onClick = { apiKeyDialog = true }, headlineContent = { Text(stringResource(R.string.settings_api_key)) },
+                        supportingContent = { Text(stringResource(if (keySet) R.string.settings_api_key_set else R.string.settings_api_key_missing)) })
                 }
                 Section.BACKGROUND -> {
                     Text(stringResource(R.string.settings_interval), fontSize = 18.sp, color = TextTertiary)
@@ -132,6 +137,7 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
             extraAction = stringResource(R.string.settings_tile_clear) to { vm.setTile(index, null); pickFor = null },
         )
     }
+    if (apiKeyDialog) ApiKeyDialog(current = prefs.owmApiKey, onSave = { vm.setOwmApiKey(it); apiKeyDialog = false }, onDismiss = { apiKeyDialog = false })
     if (addCity) AddCityDialog(search = { vm.searchCities(it) }, onPick = { vm.addCity(it); addCity = false }, onDismiss = { addCity = false })
     cityMenu?.let { i ->
         PolkaDialog(onDismiss = { cityMenu = null }, title = prefs.cities.getOrNull(i)?.displayName ?: "") {

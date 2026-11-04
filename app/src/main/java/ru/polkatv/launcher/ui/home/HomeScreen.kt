@@ -49,6 +49,7 @@ fun HomeScreen(
     var addCity by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val net by container.network.state.collectAsStateWithLifecycle()
+    val weatherKeyAvailable by container.weatherKeyAvailable.collectAsStateWithLifecycle()
     var inputs by remember { mutableStateOf<List<TvInput>?>(null) }
     val hasInputs = remember { container.inputs.list().isNotEmpty() }
     fun orToast(ok: Boolean) { if (!ok) Toast.makeText(context, R.string.unavailable_on_tv, Toast.LENGTH_SHORT).show() }
@@ -85,6 +86,7 @@ fun HomeScreen(
             Spacer(Modifier.height(Dimens.tierGap))
             Box(Modifier.weight(1f).fillMaxWidth().tierExits(up = tiers.header, down = tiers.row)) {
                 WeatherShelf(
+                    apiKeyMissing = !weatherKeyAvailable,
                     cities = state.cities, selected = state.selectedCity,
                     onSelect = vm::selectCity,
                     onOpenDetail = { onOpenWeather(state.selectedCity) },

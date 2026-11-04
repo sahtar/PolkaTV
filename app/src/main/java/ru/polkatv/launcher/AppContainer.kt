@@ -6,8 +6,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import ru.polkatv.launcher.apps.AppsRepository
 import ru.polkatv.launcher.apps.TileArtLoader
@@ -40,7 +43,21 @@ class AppContainer(val appContext: Context) {
     val inputs = InputsController(appContext, system)
     val httpClient = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).retryOnConnectionFailure(true).build()
     val weather = WeatherRepository(
-        OwmApi(httpClient, BuildConfig.OWM_API_KEY, geocoder = OpenMeteoApi(httpClient)),
+        OwmApi(httpClient, { prefs.value.owmApiKey.ifBlank { BuildConfig.OWM_API_KEY } }, geocoder = OpenMeteoApi(httpClient)),
         WeatherCache(File(appContext.filesDir, "weather")),
     )
+
+    /** A key is available either from the device settings or baked into this build (owner builds). */
+    val weatherKeyAvailable: StateFlow<Boolean> = prefs.map { it.owmApiKey.isNotBlank() || BuildConfig.OWM_API_KEY.isNotBlank() }
+        .stateIn(appScope, SharingStarted.Eagerly, BuildConfig.OWM_API_KEY.isNotBlank())
+
+    /** Saves the OpenWeatherMap key (settings dialog or the adb intent extra) and refreshes every city with it. */
+    fun setOwmApiKey(key: String) {
+        val k = key.trim()
+        appScope.launch {
+            settings.update { it.copy(owmApiKey = k) }
+            withTimeoutOrNull(5_000) { prefs.first { it.owmApiKey == k } }
+            prefs.value.cities.forEach { runCatching { weather.refresh(it, force = true) } }
+        }
+    }
 }

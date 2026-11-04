@@ -64,7 +64,7 @@
     <string name="ago_minutes">%1$d min</string>
     <string name="ago_hours">%1$d h</string>
     <string name="ago_days">%1$d d</string>
-    <string name="wx_no_api_key">OpenWeatherMap API key is not set</string>
+    <string name="wx_no_api_key">OpenWeatherMap key is not set: Settings → Cities</string>
     <string name="wx_no_data">No data, check the network</string>
     <string name="wx_add_city_prompt">Add a city to see the weather</string>
     <string name="city_menu_add">Add city</string>
@@ -97,6 +97,15 @@
     <string name="settings_city_up">Up</string>
     <string name="settings_city_down">Down</string>
     <string name="settings_city_remove">Remove</string>
+    <string name="settings_api_key">OpenWeatherMap key</string>
+    <string name="settings_api_key_set">Set</string>
+    <string name="settings_api_key_missing">Not set — weather needs it</string>
+    <string name="api_key_title">OpenWeatherMap key</string>
+    <string name="api_key_hint">Paste your key</string>
+    <string name="api_key_help">Free key: openweathermap.org → My API keys. To avoid typing it with the remote: adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key KEY</string>
+    <string name="api_key_saved">OpenWeatherMap key saved</string>
+    <string name="action_save">Save</string>
+    <string name="action_clear">Clear</string>
     <string name="settings_interval">Background change</string>
     <string name="settings_interval_off">Off</string>
     <string name="settings_interval_min">Every %1$d min</string>

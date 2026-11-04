@@ -1,6 +1,8 @@
 package ru.polkatv.launcher
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import ru.polkatv.launcher.ui.PolkaApp
@@ -11,7 +13,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val container = (application as PolkaApplication).container
         setContent { PolkaTheme { PolkaApp(container) } }
+        handleKeyExtra(intent)
     }
+
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); handleKeyExtra(intent) }
+
+    /** `adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key KEY` saves the OpenWeatherMap key without typing it on the remote. */
+    private fun handleKeyExtra(intent: Intent?) {
+        val key = intent?.getStringExtra(EXTRA_OWM_API_KEY)?.trim()?.takeIf { it.isNotEmpty() } ?: return
+        intent.removeExtra(EXTRA_OWM_API_KEY)
+        (application as PolkaApplication).container.setOwmApiKey(key)
+        Toast.makeText(this, R.string.api_key_saved, Toast.LENGTH_SHORT).show()
+    }
+
+    companion object { const val EXTRA_OWM_API_KEY = "owm_api_key" }
 
     override fun onResume() { super.onResume(); (application as PolkaApplication).homeVisibility.onResumed() }
     override fun onPause() { (application as PolkaApplication).homeVisibility.onPaused(); super.onPause() }

@@ -37,7 +37,6 @@ import androidx.tv.material3.ListItem
 import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.ProvideTextStyle
 import androidx.tv.material3.Text
-import ru.polkatv.launcher.BuildConfig
 import ru.polkatv.launcher.R
 import ru.polkatv.launcher.ui.common.PolkaDialog
 import ru.polkatv.launcher.ui.theme.Dimens
@@ -55,6 +54,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun WeatherShelf(
+    apiKeyMissing: Boolean = false,
     cities: List<CityWeather>,
     selected: Int,
     onSelect: (Int) -> Unit,
@@ -89,7 +89,7 @@ fun WeatherShelf(
                     Text(
                         stringResource(
                             when {
-                                BuildConfig.OWM_API_KEY.isBlank() -> R.string.wx_no_api_key
+                                apiKeyMissing -> R.string.wx_no_api_key
                                 current.error -> R.string.wx_no_data
                                 else -> R.string.wx_unknown
                             },

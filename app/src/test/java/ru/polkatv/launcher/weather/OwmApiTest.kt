@@ -53,6 +53,17 @@ class OwmApiTest {
         }
     }
 
+    @Test fun `key provider is read per request so a key saved later takes effect`() = runTest {
+        var key = ""
+        val api = OwmApi(OkHttpClient(), { key }, geocoder, base = server.url("/").toString().trimEnd('/'))
+        try { api.forecast(1.0, 2.0); fail("expected IOException") } catch (e: IOException) { assertEquals(0, server.requestCount) }
+        key = "later"
+        server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_weather_sample.json")!!.readText()))
+        server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_forecast_sample.json")!!.readText()))
+        api.forecast(55.7558, 37.6173)
+        assertEquals("later", server.takeRequest().requestUrl!!.queryParameter("appid"))
+    }
+
     @Test fun `search delegates to the geocoder`() = runTest {
         assertEquals("Москва", api().search("Moskva").single().name)
         assertEquals(0, server.requestCount)

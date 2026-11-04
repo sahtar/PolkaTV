@@ -25,10 +25,12 @@ android {
         applicationId = "ru.polkatv.launcher"
         minSdk = 28
         targetSdk = 34
-        versionCode = 9
-        versionName = "1.1.1"
+        versionCode = 10
+        versionName = "1.2.0"
         resourceConfigurations += listOf("ru", "en")
-        buildConfigField("String", "OWM_API_KEY", "\"${localProps.getProperty("owm.apiKey", "").trim()}\"")
+        // Owner builds bake the key from local.properties; public release builds pass -PowmApiKey= (empty) and users enter their key in settings.
+        val owmApiKey = (project.findProperty("owmApiKey") as String?) ?: localProps.getProperty("owm.apiKey", "")
+        buildConfigField("String", "OWM_API_KEY", "\"${owmApiKey.trim()}\"")
     }
 
     signingConfigs {
