@@ -102,7 +102,11 @@
     <string name="settings_api_key_missing">Не задан — без него погода не работает</string>
     <string name="api_key_title">Ключ OpenWeatherMap</string>
     <string name="api_key_hint">Вставьте ключ</string>
-    <string name="api_key_help">Бесплатный ключ: openweathermap.org → My API keys. Чтобы не набирать его пультом: adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key КЛЮЧ</string>
+    <string name="api_key_help">Бесплатный ключ: openweathermap.org → My API keys. Печатать можно и с телефона через приложение Google TV (клавиатура) или с компьютера: adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key КЛЮЧ</string>
+    <string name="api_key_qr_hint">Отсканируйте код телефоном, вставьте ключ на открывшейся странице и нажмите «Отправить» — телевизор сохранит его сам.</string>
+    <string name="api_key_qr_url">Или откройте на телефоне: %1$s</string>
+    <string name="api_key_no_network">Телевизор не подключён к сети: QR-код недоступен, введите ключ вручную.</string>
+    <string name="api_key_manual">Ввести ключ вручную</string>
     <string name="api_key_saved">Ключ OpenWeatherMap сохранён</string>
     <string name="action_save">Сохранить</string>
     <string name="action_clear">Очистить</string>

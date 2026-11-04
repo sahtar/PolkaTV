@@ -102,7 +102,11 @@
     <string name="settings_api_key_missing">Not set — weather needs it</string>
     <string name="api_key_title">OpenWeatherMap key</string>
     <string name="api_key_hint">Paste your key</string>
-    <string name="api_key_help">Free key: openweathermap.org → My API keys. To avoid typing it with the remote: adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key KEY</string>
+    <string name="api_key_help">Free key: openweathermap.org → My API keys. You can also type from a phone with the Google TV app keyboard, or from a computer: adb shell am start -n ru.polkatv.launcher/.MainActivity --es owm_api_key KEY</string>
+    <string name="api_key_qr_hint">Scan the code with your phone, paste the key on the page that opens and tap Send — the TV saves it by itself.</string>
+    <string name="api_key_qr_url">Or open on your phone: %1$s</string>
+    <string name="api_key_no_network">The TV is offline: no QR code, enter the key manually.</string>
+    <string name="api_key_manual">Enter the key manually</string>
     <string name="api_key_saved">OpenWeatherMap key saved</string>
     <string name="action_save">Save</string>
     <string name="action_clear">Clear</string>
