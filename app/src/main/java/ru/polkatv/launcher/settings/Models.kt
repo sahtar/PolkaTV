@@ -22,12 +22,13 @@ enum class DimLevel(val strength: Float) { LIGHT(0.5f), MEDIUM(1.0f) }
 @Serializable
 enum class ClockFormat { SYSTEM, H24, H12 }
 
+/** First-run tiles: services common in Europe, the Americas and beyond. Missing ones show as "Choose an app". */
 val DEFAULT_TILES: List<String?> = listOf(
     "com.google.android.youtube.tv",
-    "ru.kinopoisk.tv",
-    "ru.ivi.client",
-    "ru.mts.mtstv",
-    "ru.more.play",
+    "com.netflix.ninja",
+    "com.amazon.amazonvideo.livingroom",
+    "com.disney.disneyplus",
+    "com.spotify.tv.android",
 )
 
 @Serializable

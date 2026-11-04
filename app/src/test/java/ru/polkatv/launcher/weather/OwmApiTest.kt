@@ -22,7 +22,7 @@ class OwmApiTest {
     @Before fun setUp() { server = MockWebServer(); server.start() }
     @After fun tearDown() { server.shutdown() }
 
-    private fun api(key: String = "k123") = OwmApi(OkHttpClient(), key, geocoder, base = server.url("/").toString().trimEnd('/'))
+    private fun api(key: String = "k123") = OwmApi(OkHttpClient(), key, geocoder, base = server.url("/").toString().trimEnd('/'), lang = "ru")
 
     @Test fun `forecast calls weather then forecast with key, metric units and russian`() = runTest {
         server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_weather_sample.json")!!.readText()))
@@ -62,6 +62,14 @@ class OwmApiTest {
         server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_forecast_sample.json")!!.readText()))
         api.forecast(55.7558, 37.6173)
         assertEquals("later", server.takeRequest().requestUrl!!.queryParameter("appid"))
+    }
+
+    @Test fun `condition language follows the constructor argument and defaults to the locale language`() = runTest {
+        server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_weather_sample.json")!!.readText()))
+        server.enqueue(MockResponse().setBody(javaClass.getResource("/openmeteo/owm_forecast_sample.json")!!.readText()))
+        OwmApi(OkHttpClient(), "k", geocoder, base = server.url("/").toString().trimEnd('/'), lang = "de").forecast(1.0, 2.0)
+        assertEquals("de", server.takeRequest().requestUrl!!.queryParameter("lang"))
+        assertEquals(java.util.Locale.getDefault().language.ifBlank { "en" }, OwmApi.defaultLang())
     }
 
     @Test fun `search delegates to the geocoder`() = runTest {

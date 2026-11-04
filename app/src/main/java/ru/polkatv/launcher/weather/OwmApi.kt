@@ -19,9 +19,11 @@ class OwmApi(
     private val apiKey: () -> String,
     private val geocoder: WeatherApi,
     private val base: String = "https://api.openweathermap.org",
+    /** Language of the condition texts OpenWeatherMap returns; follows the device locale. */
+    private val lang: String = defaultLang(),
 ) : WeatherApi {
-    constructor(client: OkHttpClient, apiKey: String, geocoder: WeatherApi, base: String = "https://api.openweathermap.org") :
-        this(client, { apiKey }, geocoder, base)
+    constructor(client: OkHttpClient, apiKey: String, geocoder: WeatherApi, base: String = "https://api.openweathermap.org", lang: String = defaultLang()) :
+        this(client, { apiKey }, geocoder, base, lang)
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -40,9 +42,13 @@ class OwmApi(
             .addQueryParameter("lat", String.format(Locale.US, "%.4f", lat))
             .addQueryParameter("lon", String.format(Locale.US, "%.4f", lon))
             .addQueryParameter("units", "metric")
-            .addQueryParameter("lang", "ru")
+            .addQueryParameter("lang", lang)
             .addQueryParameter("appid", key)
             .build().toString()
+
+    companion object {
+        fun defaultLang(): String = Locale.getDefault().language.ifBlank { "en" }
+    }
 
     private suspend fun get(url: String): String = withContext(Dispatchers.IO) {
         client.newCall(Request.Builder().url(url).header("User-Agent", "PolkaTV/0.1").build()).execute().use { resp ->
