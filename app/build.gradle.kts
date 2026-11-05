@@ -46,6 +46,9 @@ android {
 
     buildTypes {
         debug {
+            // Separate app id: a debug copy can live next to the release install (used for screenshots/tests without touching real settings).
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
             signingConfig = signingConfigs.findByName("polka") ?: signingConfigs.getByName("debug")
         }
         release {
