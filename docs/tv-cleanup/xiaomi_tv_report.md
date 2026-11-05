@@ -48,8 +48,10 @@ ru.mts.mtstv (KION), ru.kinopoisk.tv, ru.ivi.client, ru.start.androidmobile, net
 - YouTube Music, Google TV (videos), Google Assistant (katniss) — пользовательские/голосовой поиск.
 - В Chromecast включена отправка статистики и крэш-репортов Google — меняется только в настройках ТВ.
 
-## Откат
-`bash xiaomi_tv_rollback.sh` — включает пакеты обратно и снимает ограничения фона.
+## Применить и откатить
+`TV=<ip>:5555 bash xiaomi_tv_cleanup.sh` — применяет всю чистку на другом таком же телевизоре: отключает восемь пакетов (телеметрия, статистика, TV Manager, Play Games, PatchWall с michannel, Mi Connect, Google Assistant) и запускает `xiaomi_tv_restrict_background.sh`. С `OPTIONAL=0` PatchWall, Mi Connect и ассистент остаются включёнными. Список приложений для запрета фона — в `xiaomi_tv_restrict_background.sh`, его стоит подправить под свой набор приложений.
+
+`TV=<ip>:5555 bash xiaomi_tv_rollback.sh` — включает пакеты обратно и снимает ограничения фона.
 Вручную: `adb shell pm enable --user 0 <пакет>` и `adb shell cmd appops set --user 0 <пакет> RUN_ANY_IN_BACKGROUND allow`, затем обязательно `adb shell cmd appops write-settings` (см. запись от 2026-10-25 22:16). Повторное применение ограничений: `xiaomi_tv_restrict_background.sh`.
 
 ## Повторная проверка 2026-10-25 (вечер, аптайм 11 ч)
